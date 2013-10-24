@@ -40,6 +40,8 @@ public abstract class Model {
 	@Column(name = "Id")
 	private Long mId = null;
 
+	private boolean mReplacable = false;
+
 	private TableInfo mTableInfo;
 
 	//////////////////////////////////////////////////////////////////////////////////////
@@ -56,6 +58,11 @@ public abstract class Model {
 
 	public final Long getId() {
 		return mId;
+	}
+
+	public final void setId(Long id) {
+		mReplacable = true;
+		mId = id;
 	}
 
 	public final void delete() {
@@ -147,9 +154,16 @@ public abstract class Model {
 		}
 
 		if (mId == null) {
-			mId = db.insert(mTableInfo.getTableName(), null, values);
-		}
-		else {
+			if (mReplacable) {
+				values.put("Id", mId); // update values?
+				Long i = db.insertWithOnConflict(mTableInfo.getTableName(), null, values, SQLiteDatabase.CONFLICT_REPLACE);
+				if (i != mId) {
+					Log.e("insertWithOnConflict: " + i + " != mId: "  + mId);
+				}
+			} else {
+				mId = db.insert(mTableInfo.getTableName(), null, values);
+			}
+		} else {
 			db.update(mTableInfo.getTableName(), values, "Id=" + mId, null);
 		}
 
