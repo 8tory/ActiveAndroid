@@ -153,16 +153,14 @@ public abstract class Model {
 			}
 		}
 
-		if (mId == null) {
-			if (mReplacable) {
-				values.put("Id", mId); // update values?
-				Long i = db.insertWithOnConflict(mTableInfo.getTableName(), null, values, SQLiteDatabase.CONFLICT_REPLACE);
-				if (i != mId) {
-					Log.e("insertWithOnConflict: " + i + " != mId: "  + mId);
-				}
-			} else {
-				mId = db.insert(mTableInfo.getTableName(), null, values);
+		if (mReplacable && mId != null) {
+			values.put("Id", mId); // update values?
+			Long i = db.insertWithOnConflict(mTableInfo.getTableName(), null, values, SQLiteDatabase.CONFLICT_REPLACE);
+			if (i != mId) {
+				Log.e("insertWithOnConflict: " + i + " != mId: "  + mId);
 			}
+		} else if (mId == null) {
+			mId = db.insert(mTableInfo.getTableName(), null, values);
 		} else {
 			db.update(mTableInfo.getTableName(), values, "Id=" + mId, null);
 		}
