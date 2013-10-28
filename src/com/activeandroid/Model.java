@@ -40,7 +40,7 @@ public abstract class Model {
 	@Column(name = "Id")
 	private Long mId = null;
 
-	private boolean mReplacable = false;
+	private Long mSpecificId = null;
 
 	private TableInfo mTableInfo;
 
@@ -60,9 +60,8 @@ public abstract class Model {
 		return mId;
 	}
 
-	public final void setId(Long id) {
-		mReplacable = true;
-		mId = id;
+	public final void setSpecificId(Long id) {
+		mSpecificId = id;
 	}
 
 	public final void delete() {
@@ -153,10 +152,12 @@ public abstract class Model {
 			}
 		}
 
+		if (mSpecificId != null) values.put("Id", mSpecificId);
 		if (mId == null) {
 			mId = db.insert(mTableInfo.getTableName(), null, values);
+			if (mSpecificId != null) mId = mSpecificId;
 		} else {
-			if (mReplacable) values.put("Id", mId); // update values?
+			if (mSpecificId != null) mId = mSpecificId;
 			db.update(mTableInfo.getTableName(), values, "Id=" + mId, null);
 		}
 
