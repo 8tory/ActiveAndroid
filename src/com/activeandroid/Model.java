@@ -40,7 +40,7 @@ public abstract class Model {
 	@Column(name = "Id")
 	private Long mId = null;
 
-	private Long mSpecificId = null;
+	private boolean mReplace;
 
 	private TableInfo mTableInfo;
 
@@ -60,12 +60,13 @@ public abstract class Model {
 		return mId;
 	}
 
-	public final void setId(Long id) {
+	public final void setSpecificId(Long id, boolean replace) {
+		mReplace = replace;
 		mId = id;
 	}
 
 	public final void setSpecificId(Long id) {
-		mSpecificId = id;
+		setSpecificId(id, false);
 	}
 
 	public final void delete() {
@@ -157,13 +158,15 @@ public abstract class Model {
 			}
 		}
 
-		if (mSpecificId != null) values.put("Id", mSpecificId);
 		if (mId == null) {
 			mId = db.insert(mTableInfo.getTableName(), null, values);
-			if (mSpecificId != null) mId = mSpecificId;
 		} else {
-			if (mSpecificId != null) mId = mSpecificId;
-			db.update(mTableInfo.getTableName(), values, "Id=" + mId, null);
+			values.put("Id", mId);
+			if (mReplace) {
+				Long i = db.insertWithOnConflict(mTableInfo.getTableName(), null, values, SQLiteDatabase.CONFLICT_REPLACE);
+			} else {
+				db.update(mTableInfo.getTableName(), values, "Id=" + mId, null);
+			}
 		}
 
 		Cache.getContext().getContentResolver()
