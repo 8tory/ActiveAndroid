@@ -41,6 +41,7 @@ public abstract class Model {
 	private Long mId = null;
 
 	private Long mSpecificId = null;
+	private boolean mReplace = false;
 
 	private TableInfo mTableInfo;
 
@@ -60,12 +61,18 @@ public abstract class Model {
 		return mId;
 	}
 
+	public final void setId(Long id, boolean replace) {
+		mReplace = replace;
+		if (mReplace) mId = id;
+		else mSpecificId = id;
+	}
+
 	public final void setId(Long id) {
-		mId = id;
+		setId(id, true);
 	}
 
 	public final void setSpecificId(Long id) {
-		mSpecificId = id;
+		setId(id, false);
 	}
 
 	public final void delete() {
@@ -157,11 +164,18 @@ public abstract class Model {
 			}
 		}
 
-		if (mSpecificId != null) values.put("Id", mSpecificId);
-		if (mId == null) {
+		if (mReplace && mId != null) {
+			values.put("Id", mId); // update values?
+			Long i = db.insertWithOnConflict(mTableInfo.getTableName(), null, values, SQLiteDatabase.CONFLICT_REPLACE);
+			if (i != mId) {
+				Log.e("insertWithOnConflict: " + i + " != mId: "  + mId);
+			}
+		} else if (mId == null) {
+			if (mSpecificId != null) values.put("Id", mSpecificId);
 			mId = db.insert(mTableInfo.getTableName(), null, values);
 			if (mSpecificId != null) mId = mSpecificId;
 		} else {
+			if (mSpecificId != null) values.put("Id", mSpecificId);
 			if (mSpecificId != null) mId = mSpecificId;
 			db.update(mTableInfo.getTableName(), values, "Id=" + mId, null);
 		}
