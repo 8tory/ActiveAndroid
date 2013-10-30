@@ -60,6 +60,10 @@ public abstract class Model {
 		return mId;
 	}
 
+	public final void setId(Long id) {
+		mId = id;
+	}
+
 	public final void setSpecificId(Long id) {
 		mSpecificId = id;
 	}
