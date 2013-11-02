@@ -106,6 +106,17 @@ public class ContentProvider extends android.content.ContentProvider {
 	}
 
 	@Override
+	public int bulkInsert(Uri uri, ContentValues[] values) {
+		int i;
+		ActiveAndroid.beginTransaction();
+		i = super.bulkInsert(uri, values);
+		ActiveAndroid.setTransactionSuccessful();
+		ActiveAndroid.endTransaction();
+
+		return i;
+	}
+
+	@Override
 	public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
 		final Class<? extends Model> type = getModelType(uri);
 		final int count = Cache.openDatabase().update(Cache.getTableName(type), values, selection, selectionArgs);
