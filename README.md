@@ -7,14 +7,14 @@ ActiveAndroid does so much more than this though. Accessing the database is a ha
 
 ## Documentation
 
-* [Getting started](http://github.com/pardom/ActiveAndroid/wiki/Getting-started)
-* [Creating your database model](http://github.com/pardom/ActiveAndroid/wiki/Creating-your-database-model)
-* [Saving to the database](http://github.com/pardom/ActiveAndroid/wiki/Saving-to-the-database)
-* [Querying the database](http://github.com/pardom/ActiveAndroid/wiki/Querying-the-database)
-* [Type serializers](http://github.com/pardom/ActiveAndroid/wiki/Type-serializers)
-* [Using the content provider](http://github.com/pardom/ActiveAndroid/wiki/Using-the-content-provider)
-* [Schema migrations](http://github.com/pardom/ActiveAndroid/wiki/Schema-migrations)
-* [Pre-populated-databases](http://github.com/pardom/ActiveAndroid/wiki/Pre-populated-databases)
+* [Getting started](../wikis/Getting-started)
+* [Creating your database model](../wikis/Creating-your-database-model)
+* [Saving to the database](../wikis/Saving-to-the-database)
+* [Querying the database](../wikis/Querying-the-database)
+* [Type serializers](../wikis/Type-serializers)
+* [Using the content provider](../wikis/Using-the-content-provider)
+* [Schema migrations](../wikis/Schema-migrations)
+* [Pre-populated-databases](../wikis/Pre-populated-databases)
 
 ## License
 
