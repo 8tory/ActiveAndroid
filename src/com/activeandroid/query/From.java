@@ -94,9 +94,13 @@ public final class From implements Sqlable {
 	}
 
 	public From where(String where, Object... args) {
+		return where(where, Arrays.asList(args));
+	}
+
+	public From where(String where, List<Object> args) {
 		mWhere = where;
 		mArguments.clear();
-		mArguments.addAll(Arrays.asList(args));
+		mArguments.addAll(args);
 
 		return this;
 	}
