@@ -109,9 +109,12 @@ public class ContentProvider extends android.content.ContentProvider {
 	public int bulkInsert(Uri uri, ContentValues[] values) {
 		int i;
 		ActiveAndroid.beginTransaction();
-		i = super.bulkInsert(uri, values);
-		ActiveAndroid.setTransactionSuccessful();
-		ActiveAndroid.endTransaction();
+		try {
+			i = super.bulkInsert(uri, values);
+			ActiveAndroid.setTransactionSuccessful();
+		} finally {
+			ActiveAndroid.endTransaction();
+		}
 
 		return i;
 	}
