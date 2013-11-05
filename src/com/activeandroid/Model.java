@@ -34,11 +34,13 @@ import java.util.List;
 
 @SuppressWarnings("unchecked")
 public abstract class Model {
+	public static final String FIELD_ID = "Id";
+
 	//////////////////////////////////////////////////////////////////////////////////////
 	// PRIVATE MEMBERS
 	//////////////////////////////////////////////////////////////////////////////////////
 
-	@Column(name = "Id")
+	@Column(name = FIELD_ID)
 	private Long mId = null;
 
 	private boolean mReplace;
