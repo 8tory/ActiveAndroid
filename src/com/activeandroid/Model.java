@@ -16,6 +16,7 @@ package com.activeandroid;
  * limitations under the License.
  */
 
+import android.annotation.SuppressLint;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -78,6 +79,7 @@ public abstract class Model {
 	}
 
 	// super me: super.save();
+	@SuppressLint("NewApi")
 	public void save() {
 		final SQLiteDatabase db = Cache.openDatabase();
 		final ContentValues values = new ContentValues();
@@ -164,6 +166,7 @@ public abstract class Model {
 			values.put("Id", mId);
 			if (mReplace) {
 				Long i = db.insertWithOnConflict(mTableInfo.getTableName(), null, values, SQLiteDatabase.CONFLICT_REPLACE);
+				if (mId != i) Log.i("mId: " + mId + " != i: " + i);
 			} else {
 				db.update(mTableInfo.getTableName(), values, "Id=" + mId, null);
 			}
