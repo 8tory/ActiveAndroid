@@ -257,7 +257,8 @@ public class Configuration {
 				model = ensurePackageInName(model);
 
 				try {
-					Class modelClass = Class.forName(model, false, classLoader);
+					@SuppressWarnings("unchecked")
+					Class<? extends Model> modelClass = (Class<? extends Model>) Class.forName(model, false, classLoader);
 					if (ReflectionUtils.isModel(modelClass)) {
 						modelClasses.add(modelClass);
 					}
@@ -277,7 +278,8 @@ public class Configuration {
 				serializer = ensurePackageInName(serializer);
 
 				try {
-					Class serializerClass = Class.forName(serializer, false, classLoader);
+					@SuppressWarnings("unchecked")
+					Class<? extends TypeSerializer> serializerClass = (Class<? extends TypeSerializer>) Class.forName(serializer, false, classLoader);
 					if (ReflectionUtils.isTypeSerializer(serializerClass)) {
 						typeSerializers.add(serializerClass);
 					}

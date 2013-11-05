@@ -43,6 +43,7 @@ final class ModelInfo {
 	//////////////////////////////////////////////////////////////////////////////////////
 
 	private Map<Class<? extends Model>, TableInfo> mTableInfos = new HashMap<Class<? extends Model>, TableInfo>();
+	@SuppressWarnings("serial")
 	private Map<Class<?>, TypeSerializer> mTypeSerializers = new HashMap<Class<?>, TypeSerializer>() {
 		{
 			put(Calendar.class, new CalendarSerializer());
