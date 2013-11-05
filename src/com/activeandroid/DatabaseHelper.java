@@ -72,7 +72,6 @@ public final class DatabaseHelper extends SQLiteOpenHelper {
 		executePragmas(db);
 		executeCreate(db);
 		executeMigrations(db, oldVersion, newVersion);
-		executeCreate(db);
 	}
 
 	//////////////////////////////////////////////////////////////////////////////////////
