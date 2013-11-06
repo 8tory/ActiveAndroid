@@ -169,9 +169,7 @@ public abstract class Model {
 		} else {
 			values.put("Id", mId);
 			if (mReplace) {
-				Model m = load(mTableInfo.getType(), mId);
-				if (m == null) db.insert(mTableInfo.getTableName(), null, values);
-				else db.update(mTableInfo.getTableName(), values, "Id=" + mId, null);
+				db.replace(mTableInfo.getTableName(), null, values);
 			} else {
 				db.update(mTableInfo.getTableName(), values, "Id=" + mId, null);
 			}
