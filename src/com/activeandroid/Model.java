@@ -169,8 +169,9 @@ public abstract class Model {
 		} else {
 			values.put("Id", mId);
 			if (mReplace) {
-				Long i = db.insertWithOnConflict(mTableInfo.getTableName(), null, values, SQLiteDatabase.CONFLICT_REPLACE);
-				if (mId != i) Log.i("mId: " + mId + " != i: " + i);
+				Model m = load(mTableInfo.getType(), mId);
+				if (m == null) db.insert(mTableInfo.getTableName(), null, values);
+				else db.update(mTableInfo.getTableName(), values, "Id=" + mId, null);
 			} else {
 				db.update(mTableInfo.getTableName(), values, "Id=" + mId, null);
 			}
