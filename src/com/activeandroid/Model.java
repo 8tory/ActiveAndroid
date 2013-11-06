@@ -35,11 +35,13 @@ import java.util.List;
 @SuppressWarnings("unchecked")
 public abstract class Model {
 	public static final String FIELD_ID = "Id";
+	public static final String ID = FIELD_ID;
 
 	//////////////////////////////////////////////////////////////////////////////////////
 	// PRIVATE MEMBERS
 	//////////////////////////////////////////////////////////////////////////////////////
 
+	@org.chalup.microorm.annotations.Column(ID)
 	@Column(name = FIELD_ID)
 	private Long mId = null;
 
