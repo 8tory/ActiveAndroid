@@ -47,7 +47,7 @@ public abstract class Model {
 
 	private Long mSpecificId = null;
 
-	private boolean mReplace;
+	private boolean mReplace = false;
 
 	private TableInfo mTableInfo;
 
@@ -67,6 +67,10 @@ public abstract class Model {
 		return mId;
 	}
 
+	public final Long getSpecificId() {
+		return mSpecificId;
+	}
+
 	public final void setSpecificId(Long id, boolean replace) {
 		mReplace = replace;
 		mSpecificId = id;
@@ -74,6 +78,10 @@ public abstract class Model {
 
 	public final void setSpecificId(Long id) {
 		setSpecificId(id, false);
+	}
+
+	public final void setReplace(boolean replace) {
+		mReplace = replace;
 	}
 
 	public final void delete() {
