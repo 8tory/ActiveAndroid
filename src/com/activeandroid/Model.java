@@ -42,7 +42,6 @@ public abstract class Model {
 	// PRIVATE MEMBERS
 	//////////////////////////////////////////////////////////////////////////////////////
 
-	@org.chalup.microorm.annotations.Column(ID)
 	@Column(name = FIELD_ID)
 	private Long mId = null;
 
