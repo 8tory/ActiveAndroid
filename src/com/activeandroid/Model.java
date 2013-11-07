@@ -174,32 +174,45 @@ public abstract class Model {
 			}
 		}
 
-		if (ActiveAndroid.inContentProvider()) {
-			if (mId == null) {
-				Cache.getContext().getContentResolver().insert(ContentProvider.createUri(mTableInfo.getType(), null), values);
-			} else {
-				Cache.getContext().getContentResolver().update(ContentProvider.createUri(mTableInfo.getType(), null), values, "Id=" + mId, null);
-			}
-		} else {
 		if (mSpecificId != null && mReplace) { // replace
 			mId = mSpecificId;
 			values.put("Id", mId);
-			db.replace(mTableInfo.getTableName(), null, values);
+			if (!ActiveAndroid.inContentProvider()) {
+				db.replace(mTableInfo.getTableName(), null, values);
+			} else {
+				Model m = load(mTableInfo.getType(), mId);
+				if (m == null) {
+					Cache.getContext().getContentResolver().insert(ContentProvider.createUri(mTableInfo.getType(), null), values);
+				} else {
+					Cache.getContext().getContentResolver().update(ContentProvider.createUri(mTableInfo.getType(), null), values, "Id=" + mId, null);
+				}
+			}
 		} else if (mId == null) { // insert
 			if (mSpecificId != null && !mReplace) {
 				mId = mSpecificId;
 				values.put("Id", mId);
-				db.insert(mTableInfo.getTableName(), null, values);
+				if (!ActiveAndroid.inContentProvider()) {
+					db.insert(mTableInfo.getTableName(), null, values);
+				} else {
+					Cache.getContext().getContentResolver().insert(ContentProvider.createUri(mTableInfo.getType(), null), values);
+				}
 			} else {
-				mId = db.insert(mTableInfo.getTableName(), null, values);
+				if (!ActiveAndroid.inContentProvider()) {
+					mId = db.insert(mTableInfo.getTableName(), null, values);
+				} else {
+					Cache.getContext().getContentResolver().insert(ContentProvider.createUri(mTableInfo.getType(), null), values);
+				}
 			}
 		} else { // update for mId
-			db.update(mTableInfo.getTableName(), values, "Id=" + mId, null);
+			if (!ActiveAndroid.inContentProvider()) {
+				db.update(mTableInfo.getTableName(), values, "Id=" + mId, null);
+			} else {
+				Cache.getContext().getContentResolver().update(ContentProvider.createUri(mTableInfo.getType(), null), values, "Id=" + mId, null);
+			}
 		}
 
 		Cache.getContext().getContentResolver()
 				.notifyChange(ContentProvider.createUri(mTableInfo.getType(), mId), null);
-		}
 	}
 
 	// Convenience methods
