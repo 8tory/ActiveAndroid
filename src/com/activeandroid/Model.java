@@ -45,6 +45,8 @@ public abstract class Model {
 	@Column(name = FIELD_ID)
 	private Long mId = null;
 
+	private Long mSpecificId = null;
+
 	private boolean mReplace;
 
 	private TableInfo mTableInfo;
@@ -67,7 +69,7 @@ public abstract class Model {
 
 	public final void setSpecificId(Long id, boolean replace) {
 		mReplace = replace;
-		mId = id;
+		mSpecificId = id;
 	}
 
 	public final void setSpecificId(Long id) {
@@ -164,15 +166,20 @@ public abstract class Model {
 			}
 		}
 
-		if (mId == null) {
-			mId = db.insert(mTableInfo.getTableName(), null, values);
-		} else {
+		if (mSpecificId != null && mReplace) { // replace
+			mId = mSpecificId;
 			values.put("Id", mId);
-			if (mReplace) {
-				db.replace(mTableInfo.getTableName(), null, values);
+			db.replace(mTableInfo.getTableName(), null, values);
+		} else if (mId == null) { // insert
+			if (mSpecificId != null && !mReplace) {
+				mId = mSpecificId;
+				values.put("Id", mId);
+				db.insert(mTableInfo.getTableName(), null, values);
 			} else {
-				db.update(mTableInfo.getTableName(), values, "Id=" + mId, null);
+				mId = db.insert(mTableInfo.getTableName(), null, values);
 			}
+		} else { // update for mId
+			db.update(mTableInfo.getTableName(), values, "Id=" + mId, null);
 		}
 
 		Cache.getContext().getContentResolver()
