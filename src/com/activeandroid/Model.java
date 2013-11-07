@@ -200,7 +200,10 @@ public abstract class Model {
 				if (!ActiveAndroid.inContentProvider()) {
 					mId = db.insert(mTableInfo.getTableName(), null, values);
 				} else {
-					Cache.getContext().getContentResolver().insert(ContentProvider.createUri(mTableInfo.getType(), null), values);
+					mId = android.content.ContentUris.parseId(
+							Cache.getContext().getContentResolver().insert(
+								ContentProvider.createUri(mTableInfo.getType(), null),
+								values));
 				}
 			}
 		} else { // update for mId
