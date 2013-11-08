@@ -174,6 +174,7 @@ public abstract class Model {
 			}
 		}
 
+		// TODO optimize the following code snippet
 		if (mSpecificId != null && mReplace) { // replace
 			mId = mSpecificId;
 			values.put("Id", mId);
