@@ -86,6 +86,10 @@ public final class From implements Sqlable {
 		return join;
 	}
 
+	public From where() {
+		return where(null);
+	}
+
 	public From where(String where) {
 		mWhere = where;
 		mArguments.clear();
