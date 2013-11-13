@@ -255,9 +255,7 @@ public final class From implements Sqlable {
 				Cursor c = Cache.getContext().getContentResolver().query(ContentProvider.createUri(mType, null), projection, mWhere, getArguments(), mOrderBy);
 				List<T> entities = com.activeandroid.util.SQLiteUtils.processCursor(mType, c);
 				if (c != null) c.close();
-
-				if (entities.size() > 0) return entities;
-				else return null;
+				return entities;
 			}
 		}
 		else {
@@ -268,30 +266,17 @@ public final class From implements Sqlable {
 	}
 
 	public <T extends Model> T executeSingle() {
+		if (ActiveAndroid.inContentProvider()) {
+			List<T> list = execute();
+			if (list != null && !list.isEmpty()) return list.get(0);
+			else return null;
+		}
 		if (mQueryBase instanceof Select) {
-			if (!ActiveAndroid.inContentProvider()) {
-				limit(1);
-				return SQLiteUtils.rawQuerySingle(mType, toSql(), getArguments());
-			} else {
-				if (mGroupBy != null || mHaving != null || mLimit != null)
-					throw new IllegalArgumentException(String.format("Query not support by ContentProvider"));
-
-				String[] projection = {};
-				for (Field field : Cache.getTableInfo(mType).getFields()) {
-					final String fieldName = Cache.getTableInfo(mType).getColumnName(field);
-					java.util.Arrays.fill(projection, fieldName);
-				}
-				Cursor c = Cache.getContext().getContentResolver().query(ContentProvider.createUri(mType, null), projection, mWhere, getArguments(), mOrderBy);
-				List<T> entities = com.activeandroid.util.SQLiteUtils.processCursor(mType, c);
-				if (c != null) c.close();
-
-				if (entities.size() > 0) return entities.get(0);
-				else return null;
-			}
+			limit(1);
+			return SQLiteUtils.rawQuerySingle(mType, toSql(), getArguments());
 		}
 		else {
-			if (!ActiveAndroid.inContentProvider()) SQLiteUtils.execSql(toSql(), getArguments());
-			else Cache.getContext().getContentResolver().delete(ContentProvider.createUri(mType, null), mWhere, getArguments());
+			SQLiteUtils.execSql(toSql(), getArguments());
 			return null;
 		}
 	}
