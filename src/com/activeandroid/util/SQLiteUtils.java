@@ -108,6 +108,39 @@ public final class SQLiteUtils {
 
 	// Database creation
 
+	public static String createIndexDefinition(TableInfo tableInfo) {
+		//create index index_place on graph_place_to_place(graph_place,place);
+		final ArrayList<String> definitions = new ArrayList<String>();
+
+		for (Field field : tableInfo.getFields()) {
+			String definition = createIndexColumnDefinition(tableInfo, field);
+			if (!TextUtils.isEmpty(definition)) {
+				definitions.add(definition);
+			}
+		}
+		if (definitions.isEmpty()) return null;
+
+		return String.format("CREATE INDEX %s on %s(%s) IF NOT EXISTS;",
+				"index_" + tableInfo.getTableName(),
+				tableInfo.getTableName(),
+				TextUtils.join(",", definitions));
+	}
+
+	@SuppressWarnings("unchecked")
+	public static String createIndexColumnDefinition(TableInfo tableInfo, Field field) {
+		StringBuilder definition = new StringBuilder();
+
+		Class<?> type = field.getType();
+		final String name = tableInfo.getColumnName(field);
+		final Column column = field.getAnnotation(Column.class);
+
+		if (column.index()) {
+			definition.append(name);
+		}
+
+		return definition.toString();
+	}
+
 	public static String createTableDefinition(TableInfo tableInfo) {
 		final ArrayList<String> definitions = new ArrayList<String>();
 
