@@ -120,7 +120,7 @@ public final class SQLiteUtils {
 		}
 		if (definitions.isEmpty()) return null;
 
-		return String.format("CREATE INDEX %s on %s(%s) IF NOT EXISTS;",
+		return String.format("CREATE INDEX IF NOT EXISTS %s on %s(%s);",
 				"index_" + tableInfo.getTableName(),
 				tableInfo.getTableName(),
 				TextUtils.join(",", definitions));
