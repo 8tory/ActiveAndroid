@@ -33,6 +33,10 @@ public final class ActiveAndroid {
 		initialize(new Configuration.Builder(context).create());
 	}
 
+	public static String getDatabaseName(Context context) {
+		return new Configuration.Builder(context).create().getDatabaseName();
+	}
+
 	public static void initialize(Configuration configuration) {
 		initialize(configuration, false);
 	}
