@@ -28,6 +28,7 @@ import com.activeandroid.query.Select;
 import com.activeandroid.serializer.TypeSerializer;
 import com.activeandroid.util.Log;
 import com.activeandroid.util.ReflectionUtils;
+import android.database.ContentObserver;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
