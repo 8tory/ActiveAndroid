@@ -359,6 +359,12 @@ public abstract class Model {
 		}
 	}
 
+	public static void registerContentObserver(Class<? extends Model> type, boolean notifyForDescendents, ContentObserver observer) {
+		Cache.getContext().getContentResolver().registerContentObserver(
+				ContentProvider.createUri(type, null),
+				notifyForDescendents, observer);
+	}
+
 	//////////////////////////////////////////////////////////////////////////////////////
 	// PROTECTED METHODS
 	//////////////////////////////////////////////////////////////////////////////////////
