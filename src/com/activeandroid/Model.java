@@ -93,10 +93,8 @@ public abstract class Model {
 				.notifyChange(ContentProvider.createUri(mTableInfo.getType(), mId), null);
 	}
 
-	// super me: super.save();
 	@SuppressLint("NewApi")
-	public void save() {
-		final SQLiteDatabase db = Cache.openDatabase();
+	public ContentValues toContentValues() {
 		final ContentValues values = new ContentValues();
 
 		for (Field field : mTableInfo.getFields()) {
@@ -174,6 +172,15 @@ public abstract class Model {
 				Log.e(e.getClass().getName(), e);
 			}
 		}
+
+		return values;
+	}
+
+	// super me: super.save();
+	@SuppressLint("NewApi")
+	public void save() {
+		final SQLiteDatabase db = Cache.openDatabase();
+		final ContentValues values = toContentValues();
 
 		// TODO optimize the following code snippet
 		if (mSpecificId != null && mReplace) { // replace
