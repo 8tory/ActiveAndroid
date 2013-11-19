@@ -16,6 +16,7 @@ package com.activeandroid.util;
  * limitations under the License.
  */
 
+import android.annotation.SuppressLint;
 import android.database.Cursor;
 import android.os.Build;
 import android.text.TextUtils;
@@ -45,6 +46,7 @@ public final class SQLiteUtils {
 	// PUBLIC CONSTANTS
 	//////////////////////////////////////////////////////////////////////////////////////
 
+	@SuppressLint("NewApi")
 	public static final boolean FOREIGN_KEYS_SUPPORTED = Build.VERSION.SDK_INT >= Build.VERSION_CODES.FROYO;
 
 	//////////////////////////////////////////////////////////////////////////////////////
@@ -126,11 +128,9 @@ public final class SQLiteUtils {
 				TextUtils.join(",", definitions));
 	}
 
-	@SuppressWarnings("unchecked")
 	public static String createIndexColumnDefinition(TableInfo tableInfo, Field field) {
 		StringBuilder definition = new StringBuilder();
 
-		Class<?> type = field.getType();
 		final String name = tableInfo.getColumnName(field);
 		final Column column = field.getAnnotation(Column.class);
 

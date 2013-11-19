@@ -265,6 +265,7 @@ public final class From implements Sqlable {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	public <T extends Model> T executeSingle() {
 		if (ActiveAndroid.inContentProvider()) {
 			List<T> list = execute();
