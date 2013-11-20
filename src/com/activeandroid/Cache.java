@@ -46,7 +46,7 @@ public final class Cache {
 	private static boolean sIsInitialized = false;
 
 	private static Object yieldTransactionLock = new Object();
-	private static boolean yieldTransaction;
+	private static int yieldTransactionCount;
 
 	//////////////////////////////////////////////////////////////////////////////////////
 	// CONSTRUCTORS
@@ -157,20 +157,21 @@ public final class Cache {
 
 	public static void beginReleaseTransaction() {
 		synchronized (yieldTransactionLock) {
-			yieldTransaction = true;
+			yieldTransactionCount++;
 		}
 	}
 
 	public static void endReleaseTransaction() {
 		synchronized (yieldTransactionLock) {
-			yieldTransaction = false;
+			if (yieldTransactionCount > 0)
+				yieldTransactionCount--;
 			yieldTransactionLock.notify();
 		}
 	}
 
 	public static void yieldTransaction() {
 		synchronized (yieldTransactionLock) {
-			if (!yieldTransaction)
+			if (yieldTransactionCount <= 0)
 				return;
 
 			final SQLiteDatabase db = sDatabaseHelper.getWritableDatabase();
