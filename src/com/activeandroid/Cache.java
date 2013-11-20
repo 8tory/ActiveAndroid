@@ -163,9 +163,11 @@ public final class Cache {
 
 	public static void endReleaseTransaction() {
 		synchronized (yieldTransactionLock) {
-			if (yieldTransactionCount > 0)
-				yieldTransactionCount--;
-			yieldTransactionLock.notify();
+			yieldTransactionCount--;
+			if (yieldTransactionCount <= 0) {
+				yieldTransactionCount = 0;
+				yieldTransactionLock.notify();
+			}
 		}
 	}
 
