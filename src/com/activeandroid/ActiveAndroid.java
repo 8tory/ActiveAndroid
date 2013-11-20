@@ -102,4 +102,16 @@ public final class ActiveAndroid {
 	public static boolean inContentProvider() {
 		return sInContentProvider;
 	}
+
+	public static void beginReleaseTransaction() {
+		Cache.beginReleaseTransaction();
+	}
+
+	public static void endReleaseTransaction() {
+		Cache.endReleaseTransaction();
+	}
+
+	public static void yieldTransaction() {
+		Cache.yieldTransaction();
+	}
 }

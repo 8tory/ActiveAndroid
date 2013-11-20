@@ -45,6 +45,9 @@ public final class Cache {
 
 	private static boolean sIsInitialized = false;
 
+	private static Object yieldTransactionLock = new Object();
+	private static boolean yieldTransaction;
+
 	//////////////////////////////////////////////////////////////////////////////////////
 	// CONSTRUCTORS
 	//////////////////////////////////////////////////////////////////////////////////////
@@ -150,5 +153,42 @@ public final class Cache {
 
 	public static synchronized String getTableName(Class<? extends Model> type) {
 		return sModelInfo.getTableInfo(type).getTableName();
+	}
+
+	public static void beginReleaseTransaction() {
+		synchronized (yieldTransactionLock) {
+			yieldTransaction = true;
+		}
+	}
+
+	public static void endReleaseTransaction() {
+		synchronized (yieldTransactionLock) {
+			yieldTransaction = false;
+			yieldTransactionLock.notify();
+		}
+	}
+
+	public static void yieldTransaction() {
+		synchronized (yieldTransactionLock) {
+			if (!yieldTransaction)
+				return;
+
+			final SQLiteDatabase db = sDatabaseHelper.getWritableDatabase();
+			if (!db.inTransaction())
+				return;
+
+			try {
+				db.setTransactionSuccessful();
+			} finally {
+				db.endTransaction();
+			}
+
+			try {
+				yieldTransactionLock.wait();
+			} catch (Exception e) {
+			}
+
+			db.beginTransaction();
+		}
 	}
 }
