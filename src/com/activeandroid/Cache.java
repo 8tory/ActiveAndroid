@@ -169,7 +169,7 @@ public final class Cache {
 	public static void endReleaseTransaction() {
 		synchronized (yieldTransactionLock) {
 			final int tid = android.os.Process.myTid();
-			if (!yieldTransaction.remove(tid))
+			if (!yieldTransaction.remove(Integer.valueOf(tid)))
 				return;
 			if (yieldTransaction.isEmpty())
 				yieldTransactionLock.notifyAll();
