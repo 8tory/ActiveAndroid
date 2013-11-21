@@ -16,7 +16,9 @@ package com.activeandroid;
  * limitations under the License.
  */
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
@@ -46,7 +48,7 @@ public final class Cache {
 	private static boolean sIsInitialized = false;
 
 	private static Object yieldTransactionLock = new Object();
-	private static int yieldTransactionCount;
+	private static List<Integer> yieldTransaction = new ArrayList<Integer>();
 
 	//////////////////////////////////////////////////////////////////////////////////////
 	// CONSTRUCTORS
@@ -157,23 +159,30 @@ public final class Cache {
 
 	public static void beginReleaseTransaction() {
 		synchronized (yieldTransactionLock) {
-			yieldTransactionCount++;
+			final int tid = android.os.Process.myTid();
+			if (yieldTransaction.contains(tid))
+				return;
+			yieldTransaction.add(tid);
 		}
 	}
 
 	public static void endReleaseTransaction() {
 		synchronized (yieldTransactionLock) {
-			yieldTransactionCount--;
-			if (yieldTransactionCount <= 0) {
-				yieldTransactionCount = 0;
-				yieldTransactionLock.notify();
-			}
+			final int tid = android.os.Process.myTid();
+			if (!yieldTransaction.remove(tid))
+				return;
+			if (yieldTransaction.isEmpty())
+				yieldTransactionLock.notifyAll();
 		}
 	}
 
 	public static void yieldTransaction() {
 		synchronized (yieldTransactionLock) {
-			if (yieldTransactionCount <= 0)
+			if (yieldTransaction.isEmpty())
+				return;
+
+			final int tid = android.os.Process.myTid();
+			if (yieldTransaction.contains(tid))
 				return;
 
 			final SQLiteDatabase db = sDatabaseHelper.getWritableDatabase();
