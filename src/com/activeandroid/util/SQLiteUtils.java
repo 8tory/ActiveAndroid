@@ -26,12 +26,12 @@ import com.activeandroid.Model;
 import com.activeandroid.TableInfo;
 import com.activeandroid.annotation.Column;
 import com.activeandroid.serializer.TypeSerializer;
+import com.novoda.notils.cursor.CursorList;
+import com.novoda.notils.cursor.SimpleCursorList;
 
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
 public final class SQLiteUtils {
 	//////////////////////////////////////////////////////////////////////////////////////
@@ -90,16 +90,15 @@ public final class SQLiteUtils {
 		Cache.openDatabase().execSQL(sql, bindArgs);
 	}
 
-	public static <T extends Model> List<T> rawQuery(Class<? extends Model> type, String sql, String[] selectionArgs) {
+	public static <T extends Model> CursorList<T> rawQuery(Class<? extends Model> type, String sql, String[] selectionArgs) {
 		Cursor cursor = Cache.openDatabase().rawQuery(sql, selectionArgs);
-		List<T> entities = processCursor(type, cursor);
-		cursor.close();
+		CursorList<T> entities = processCursor(type, cursor);
 
 		return entities;
 	}
 
 	public static <T extends Model> T rawQuerySingle(Class<? extends Model> type, String sql, String[] selectionArgs) {
-		List<T> entities = rawQuery(type, sql, selectionArgs);
+		CursorList<T> entities = rawQuery(type, sql, selectionArgs);
 
 		if (entities.size() > 0) {
 			return entities.get(0);
@@ -222,31 +221,7 @@ public final class SQLiteUtils {
 		return definition.toString();
 	}
 
-	@SuppressWarnings("unchecked")
-	public static <T extends Model> List<T> processCursor(Class<? extends Model> type, Cursor cursor) {
-		final List<T> entities = new ArrayList<T>();
-
-		try {
-			Constructor<?> entityConstructor = type.getConstructor();
-
-			if (cursor.moveToFirst()) {
-				do {
-					Model entity = Cache.getEntity(type, cursor.getLong(cursor.getColumnIndex("Id")));
-					if (entity == null) {
-						entity = (T) entityConstructor.newInstance();
-					}
-
-					entity.loadFromCursor(cursor);
-					entities.add((T) entity);
-				}
-				while (cursor.moveToNext());
-			}
-
-		}
-		catch (Exception e) {
-			Log.e("Failed to process cursor.", e);
-		}
-
-		return entities;
+	public static <T extends Model> CursorList<T> processCursor(Class<? extends Model> type, Cursor cursor) {
+		return new SimpleCursorList<T>(cursor, new ModelCursorMarshaller<T>(type));
 	}
 }

@@ -25,6 +25,7 @@ import com.activeandroid.content.ContentProvider;
 import com.activeandroid.query.Join.JoinType;
 import com.activeandroid.util.Log;
 import com.activeandroid.util.SQLiteUtils;
+import com.novoda.notils.cursor.CursorList;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -239,7 +240,7 @@ public final class From implements Sqlable {
 		return sql.toString().trim();
 	}
 
-	public <T extends Model> List<T> execute() {
+	public <T extends Model> CursorList<T> execute() {
 		if (mQueryBase instanceof Select) {
 			if (!ActiveAndroid.inContentProvider()) {
 				return SQLiteUtils.rawQuery(mType, toSql(), getArguments());
@@ -253,8 +254,7 @@ public final class From implements Sqlable {
 					java.util.Arrays.fill(projection, fieldName);
 				}
 				Cursor c = Cache.getContext().getContentResolver().query(ContentProvider.createUri(mType, null), projection, mWhere, getArguments(), mOrderBy);
-				List<T> entities = com.activeandroid.util.SQLiteUtils.processCursor(mType, c);
-				if (c != null) c.close();
+				CursorList<T> entities = com.activeandroid.util.SQLiteUtils.processCursor(mType, c);
 				return entities;
 			}
 		}
@@ -268,7 +268,7 @@ public final class From implements Sqlable {
 	@SuppressWarnings("unchecked")
 	public <T extends Model> T executeSingle() {
 		if (ActiveAndroid.inContentProvider()) {
-			List<T> list = execute();
+			CursorList<T> list = execute();
 			if (list != null && !list.isEmpty()) return list.get(0);
 			else return null;
 		}

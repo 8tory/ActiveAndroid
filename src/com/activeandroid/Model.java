@@ -28,11 +28,12 @@ import com.activeandroid.query.Select;
 import com.activeandroid.serializer.TypeSerializer;
 import com.activeandroid.util.Log;
 import com.activeandroid.util.ReflectionUtils;
+import com.novoda.notils.cursor.CursorList;
+
 import android.database.ContentObserver;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
-import java.util.List;
 
 @SuppressWarnings("unchecked")
 public abstract class Model {
@@ -377,7 +378,7 @@ public abstract class Model {
 	// PROTECTED METHODS
 	//////////////////////////////////////////////////////////////////////////////////////
 
-	protected final <T extends Model> List<T> getMany(Class<T> type, String foreignKey) {
+	protected final <T extends Model> CursorList<T> getMany(Class<T> type, String foreignKey) {
 		return new Select().from(type).where(Cache.getTableName(type) + "." + foreignKey + "=?", getId()).execute();
 	}
 
