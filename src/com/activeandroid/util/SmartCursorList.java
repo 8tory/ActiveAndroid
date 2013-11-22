@@ -1,5 +1,7 @@
 package com.activeandroid.util;
 
+import java.util.List;
+
 import android.database.Cursor;
 
 import com.novoda.notils.cursor.CursorMarshaller;
@@ -11,11 +13,22 @@ public class SmartCursorList<T> extends SimpleCursorList<T> {
         super(cursor, marshaller);
     }
 
-    @Override
-    protected void finalize() throws Throwable {
+    private void _close() {
         if (!isClosed()) {
             close();
         }
+    }
+
+    @Override
+    protected void finalize() throws Throwable {
+        _close();
         super.finalize();
+    }
+
+    public static <T> void close(List<T> list) {
+        if (!(list instanceof SmartCursorList))
+            return;
+
+        ((SmartCursorList<T>)list)._close();
     }
 }
