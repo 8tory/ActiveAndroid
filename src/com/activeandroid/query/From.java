@@ -22,6 +22,7 @@ import com.activeandroid.Model;
 import com.activeandroid.query.Join.JoinType;
 import com.activeandroid.util.Log;
 import com.activeandroid.util.SQLiteUtils;
+import com.novoda.notils.cursor.CursorList;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -200,7 +201,7 @@ public final class From implements Sqlable {
 		return sql.toString().trim();
 	}
 
-	public <T extends Model> List<T> execute() {
+	public <T extends Model> CursorList<T> execute() {
 		if (mQueryBase instanceof Select) {
 			return SQLiteUtils.rawQuery(mType, toSql(), getArguments());
 		}
