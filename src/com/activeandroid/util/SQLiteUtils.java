@@ -26,8 +26,6 @@ import com.activeandroid.TableInfo;
 import com.activeandroid.annotation.Column;
 import com.activeandroid.serializer.TypeSerializer;
 import com.novoda.notils.cursor.CursorList;
-import com.novoda.notils.cursor.SimpleCursorList;
-
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -189,6 +187,6 @@ public final class SQLiteUtils {
 	}
 
 	public static <T extends Model> CursorList<T> processCursor(Class<? extends Model> type, Cursor cursor) {
-		return new SimpleCursorList<T>(cursor, new ModelCursorMarshaller<T>(type));
+		return new SmartCursorList<T>(cursor, new ModelCursorMarshaller<T>(type));
 	}
 }
