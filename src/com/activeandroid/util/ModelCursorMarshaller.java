@@ -21,12 +21,19 @@ public class ModelCursorMarshaller<T> implements CursorMarshaller<T> {
 
         try {
             entity = Cache.getEntity(type, cursor.getLong(cursor.getColumnIndex("Id")));
+        } catch (Exception e) {
+            e.printStackTrace(); // Disable this if noise
+        }
+        try {
             if (entity == null) {
                 entity = type.newInstance();
+                //android.util.Log.d("ModelCursorMarshaller", "" + type);
                 entity.loadFromCursor(cursor);
+                //android.util.Log.d("ModelCursorMarshaller", "" + entity);
             }
         } catch (Exception e) {
             Log.e("Failed to process cursor.", e);
+            //android.util.Log.e("ModelCursorMarshaller", "" + e);
         }
 
         return (T) entity;
