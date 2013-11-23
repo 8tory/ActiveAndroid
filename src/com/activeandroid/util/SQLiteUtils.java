@@ -26,6 +26,7 @@ import com.activeandroid.TableInfo;
 import com.activeandroid.annotation.Column;
 import com.activeandroid.serializer.TypeSerializer;
 import com.novoda.notils.cursor.CursorList;
+import com.novoda.notils.cursor.SmartCursorList;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
