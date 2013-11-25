@@ -19,6 +19,9 @@ package com.activeandroid.query;
 import android.text.TextUtils;
 
 import com.activeandroid.Model;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 public final class Select implements Sqlable {
 	private String[] mColumns;
@@ -30,6 +33,18 @@ public final class Select implements Sqlable {
 
 	public Select(String... columns) {
 		mColumns = columns;
+	}
+
+	public Select(Map<String, String> map) {
+		this(mapToColumns(map).toArray(new Column[map.size()]));
+	}
+
+	private static List<Column> mapToColumns(Map<String, String> map) {
+		List<Column> columns = new ArrayList<Column>();
+		for (Map.Entry<String, String> entry : map.entrySet()) {
+			columns.add(new Column(entry.getKey(), entry.getValue()));
+		}
+		return columns;
 	}
 
 	public Select(Column... columns) {
