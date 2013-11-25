@@ -100,7 +100,9 @@ public final class SQLiteUtils {
 		CursorList<T> entities = rawQuery(type, sql, selectionArgs);
 
 		if (entities.size() > 0) {
-			return entities.get(0);
+			T item = entities.get(0);
+			entities.close();
+			return item;
 		}
 
 		return null;

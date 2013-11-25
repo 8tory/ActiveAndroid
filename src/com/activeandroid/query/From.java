@@ -269,8 +269,13 @@ public final class From implements Sqlable {
 	public <T extends Model> T executeSingle() {
 		if (ActiveAndroid.inContentProvider()) {
 			CursorList<T> list = execute();
-			if (list != null && !list.isEmpty()) return list.get(0);
-			else return null;
+			if (list != null && !list.isEmpty()) {
+				T item = list.get(0);
+				list.close();
+				return item;
+			} else {
+				return null;
+			}
 		}
 		if (mQueryBase instanceof Select) {
 			limit(1);
