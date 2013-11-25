@@ -42,7 +42,7 @@ public final class Select implements Sqlable {
 	private static List<Column> mapToColumns(Map<String, String> map) {
 		List<Column> columns = new ArrayList<Column>();
 		for (Map.Entry<String, String> entry : map.entrySet()) {
-			columns.add(new Column(entry.getKey(), entry.getValue()));
+			columns.add(new Column(entry.getValue(), entry.getKey()));
 		}
 		return columns;
 	}
