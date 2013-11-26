@@ -44,6 +44,10 @@ public final class Join implements Sqlable {
 		return this;
 	}
 
+	public From on() {
+		return on(null);
+	}
+
 	public From on(String on) {
 		mOn = on;
 		return mFrom;
@@ -78,7 +82,7 @@ public final class Join implements Sqlable {
 			sql.append(" ");
 		}
 
-		if (mOn != null) {
+		if (!TextUtils.isEmpty(mOn)) {
 			sql.append("ON ");
 			sql.append(mOn);
 			sql.append(" ");
