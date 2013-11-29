@@ -36,10 +36,11 @@ public final class Select implements Sqlable {
 	}
 
 	public Select(Map<String, String> map) {
-		this(mapToColumns(map).toArray(new Column[map.size()]));
+		this(mapToColumns(map).toArray(new Column[0]));
 	}
 
 	private static List<Column> mapToColumns(Map<String, String> map) {
+		if (map == null) return null;
 		List<Column> columns = new ArrayList<Column>();
 		for (Map.Entry<String, String> entry : map.entrySet()) {
 			columns.add(new Column(entry.getValue(), entry.getKey()));
