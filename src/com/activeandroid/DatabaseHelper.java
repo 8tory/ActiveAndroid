@@ -65,6 +65,7 @@ public final class DatabaseHelper extends SQLiteOpenHelper {
 		executePragmas(db);
 		executeCreate(db);
 		executeMigrations(db, -1, db.getVersion());
+		executeCreate(db);
 		executeCreateIndex(db);
 	}
 
@@ -151,8 +152,22 @@ public final class DatabaseHelper extends SQLiteOpenHelper {
 		}
 	}
 
+	private void executeDrop(SQLiteDatabase db) {
+		db.beginTransaction();
+		try {
+			for (TableInfo tableInfo : Cache.getTableInfos()) {
+				db.execSQL("DROP TABLE IF EXISTS " + tableInfo.getTableName());
+			}
+			db.setTransactionSuccessful();
+		}
+		finally {
+			db.endTransaction();
+		}
+	}
+
 	private boolean executeMigrations(SQLiteDatabase db, int oldVersion, int newVersion) {
 		boolean migrationExecuted = false;
+		int currentVersion = oldVersion;
 		try {
 			final List<String> files = Arrays.asList(Cache.getContext().getAssets().list(MIGRATION_PATH));
 			Collections.sort(files, new NaturalOrderComparator());
@@ -168,6 +183,7 @@ public final class DatabaseHelper extends SQLiteOpenHelper {
 							migrationExecuted = true;
 
 							Log.i(file + " executed succesfully.");
+							currentVersion = version;
 						}
 					}
 					catch (NumberFormatException e) {
@@ -182,6 +198,9 @@ public final class DatabaseHelper extends SQLiteOpenHelper {
 		}
 		catch (IOException e) {
 			Log.e("Failed to execute migrations.", e);
+		}
+		if (currentVersion != newVersion && currentVersion >= 0) {
+			executeDrop(db);
 		}
 
 		return migrationExecuted;
