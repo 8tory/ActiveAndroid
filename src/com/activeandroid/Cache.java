@@ -16,6 +16,7 @@ package com.activeandroid;
  * limitations under the License.
  */
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -50,6 +51,9 @@ public final class Cache {
 	private static Object yieldTransactionLock = new Object();
 	private static List<Integer> yieldTransaction = new ArrayList<Integer>();
 
+	private static Configuration sConfiguration;
+	private static String sDatabaseName;
+
 	//////////////////////////////////////////////////////////////////////////////////////
 	// CONSTRUCTORS
 	//////////////////////////////////////////////////////////////////////////////////////
@@ -67,9 +71,16 @@ public final class Cache {
 			return;
 		}
 
+		sConfiguration = configuration;
+		sDatabaseName = sConfiguration.getDatabaseName();
+
 		sContext = configuration.getContext();
 		sModelInfo = new ModelInfo(configuration);
-		sDatabaseHelper = new DatabaseHelper(configuration);
+
+		if (canValidDatabase())
+			sDatabaseHelper = new DatabaseHelper(configuration);
+		else
+			reInitNullDatabase();
 
 		// TODO: It would be nice to override sizeOf here and calculate the memory
 		// actually used, however at this point it seems like the reflection
@@ -82,6 +93,53 @@ public final class Cache {
 		sIsInitialized = true;
 
 		Log.v("ActiveAndroid initialized successfully.");
+	}
+
+	public static synchronized void reInitDatabase() {
+		if (sConfiguration == null)
+			return;
+
+		if (!canValidDatabase()) {
+			reInitNullDatabase();
+			return;
+		}
+
+		sConfiguration.setDatabaseName(sDatabaseName);
+
+		if (sDatabaseHelper != null)
+			sDatabaseHelper.close();
+		sDatabaseHelper = new DatabaseHelper(sConfiguration);
+	}
+
+	public static synchronized void reInitNullDatabase() {
+		if (sConfiguration == null)
+			return;
+
+		sConfiguration.setDatabaseName(null);
+
+		if (sDatabaseHelper != null)
+			sDatabaseHelper.close();
+		sDatabaseHelper = new DatabaseHelper(sConfiguration);
+	}
+
+	public static synchronized boolean canValidDatabase() {
+		if (sContext == null)
+			return false;
+
+		File file = sContext.getDatabasePath(sDatabaseName);
+
+		do {
+			if (file.exists())
+				return true;
+
+			try {
+				if (!file.getCanonicalFile().equals(file.getAbsoluteFile()))
+					return false;
+			} catch (Exception e) {
+			}
+		} while ((file = file.getParentFile()) != null);
+
+		return false;
 	}
 
 	public static synchronized void clear() {

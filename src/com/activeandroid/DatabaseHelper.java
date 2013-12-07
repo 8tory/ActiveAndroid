@@ -83,6 +83,9 @@ public final class DatabaseHelper extends SQLiteOpenHelper {
 	//////////////////////////////////////////////////////////////////////////////////////
 
 	public void copyAttachedDatabase(Context context, String databaseName) {
+		if (databaseName == null)
+			return;
+
 		final File dbPath = context.getDatabasePath(databaseName);
 
 		// If the database already exists, return

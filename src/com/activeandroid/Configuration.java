@@ -58,6 +58,10 @@ public class Configuration {
 		return mDatabaseName;
 	}
 
+	public void setDatabaseName(String name) {
+		mDatabaseName = name;
+	}
+
 	public int getDatabaseVersion() {
 		return mDatabaseVersion;
 	}
