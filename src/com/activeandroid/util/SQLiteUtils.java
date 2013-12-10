@@ -21,6 +21,7 @@ import android.database.Cursor;
 import android.os.Build;
 import android.text.TextUtils;
 
+import com.activeandroid.ActiveAndroid;
 import com.activeandroid.Cache;
 import com.activeandroid.Model;
 import com.activeandroid.TableInfo;
@@ -223,6 +224,16 @@ public final class SQLiteUtils {
 	}
 
 	public static <T extends Model> CursorList<T> processCursor(Class<? extends Model> type, Cursor cursor) {
-		return new SmartCursorList<T>(cursor, new ModelCursorMarshaller<T>(type));
+		return new SmartCursorList<T>(cursor, new ModelCursorMarshaller<T>(type),
+				new SmartCursorList.OnCloseListener() {
+					@Override
+					public void onClose() {
+						ActiveAndroid.beginReleaseTransaction();
+					}
+					@Override
+					public void onCloseFinished() {
+						ActiveAndroid.endReleaseTransaction();
+					}
+				});
 	}
 }
