@@ -27,6 +27,7 @@ import java.util.Map;
 import com.activeandroid.annotation.Column;
 import com.activeandroid.annotation.Table;
 import com.activeandroid.util.Log;
+import com.activeandroid.util.ReflectionUtils;
 
 public final class TableInfo {
 	//////////////////////////////////////////////////////////////////////////////////////
@@ -53,13 +54,25 @@ public final class TableInfo {
 			mTableName = type.getSimpleName();
 		}
 
-		List<Field> fields = new ArrayList<Field>(Arrays.asList(type.getDeclaredFields()));
-		fields.add(getIdField(type));
+		List<Field> fields = new ArrayList<Field>();
+        try {
+            fields = ReflectionUtils.getAllFields(fields, Class.forName(type.getName()));
+            fields.add(getIdField(type));
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+
 
 		for (Field field : fields) {
 			if (field.isAnnotationPresent(Column.class)) {
 				final Column columnAnnotation = field.getAnnotation(Column.class);
-				mColumnNames.put(field, columnAnnotation.name());
+                String fieldName;
+                if(!columnAnnotation.name().equals("")){
+                    fieldName = columnAnnotation.name();
+                } else{
+                    fieldName = field.getName();
+                }
+				mColumnNames.put(field, fieldName);
 			}
 		}
 	}
