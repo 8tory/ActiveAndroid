@@ -119,7 +119,6 @@ public final class SQLiteUtils {
 
 	// Database creation
 
-
 	public static String[] createIndexDefinition(TableInfo tableInfo) {
 		final ArrayList<String> definitions = new ArrayList<String>();
 		sIndexGroupMap = new HashMap<String, List<String>>();
@@ -142,8 +141,6 @@ public final class SQLiteUtils {
 	}
 
 	public static void createIndexColumnDefinition(TableInfo tableInfo, Field field) {
-		StringBuilder definition = new StringBuilder();
-
 		final String name = tableInfo.getColumnName(field);
 		final Column column = field.getAnnotation(Column.class);
 

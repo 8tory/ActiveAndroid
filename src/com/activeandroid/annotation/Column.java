@@ -70,13 +70,13 @@ public @interface Column {
 	 *
 	 * @Table(name = "table_name")
 	 * public class Table extends Model {
-	 *     @Column(name = "member1", indexGroup = {"group1"})
+	 *     @Column(name = "member1", indexGroups = {"group1"})
 	 *     public String member1;
 	 *
-	 *     @Column(name = "member2", indexGroup = {"group1", "group2"})
+	 *     @Column(name = "member2", indexGroups = {"group1", "group2"})
 	 *     public String member2;
 	 *
-	 *     @Column(name = "member3", indexGroup = {"group2"})
+	 *     @Column(name = "member3", indexGroups = {"group2"})
 	 *     public String member3;
 	 * }
 	 *
