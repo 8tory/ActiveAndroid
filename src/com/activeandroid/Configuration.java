@@ -95,6 +95,7 @@ public class Configuration {
 		private static final String AA_DB_VERSION = "AA_DB_VERSION";
 		private final static String AA_MODELS = "AA_MODELS";
 		private final static String AA_SERIALIZERS = "AA_SERIALIZERS";
+		private static final String AA_CACHE_SIZE = "AA_CACHE_SIZE";
 
 		private static final int DEFAULT_CACHE_SIZE = 1024;
 		private static final String DEFAULT_DB_NAME = "Application.db";
@@ -117,7 +118,6 @@ public class Configuration {
 
 		public Builder(Context context) {
 			mContext = context.getApplicationContext();
-			mCacheSize = DEFAULT_CACHE_SIZE;
 		}
 
 		//////////////////////////////////////////////////////////////////////////////////////
@@ -187,7 +187,6 @@ public class Configuration {
 
 		public Configuration create() {
 			Configuration configuration = new Configuration(mContext);
-			configuration.mCacheSize = mCacheSize;
 
 			// Get database name from meta-data
 			if (mDatabaseName != null) {
@@ -216,6 +215,13 @@ public class Configuration {
 				}
 			}
 
+			// Get cache size from meta-data
+			if (mCacheSize != null) {
+				configuration.mCacheSize = mCacheSize;
+			} else {
+				configuration.mCacheSize = getMetaDataCacheSizeOrDefault();
+			}
+
 			// Get type serializer classes from meta-data
 			if (mTypeSerializers != null) {
 				configuration.mTypeSerializers = mTypeSerializers;
@@ -235,6 +241,15 @@ public class Configuration {
 		//////////////////////////////////////////////////////////////////////////////////////
 
 		// Meta-data methods
+
+		private int getMetaDataCacheSizeOrDefault() {
+			Integer size = ReflectionUtils.getMetaData(mContext, AA_CACHE_SIZE);
+			if (size == null) { // confirm zero
+				size = DEFAULT_CACHE_SIZE;
+			}
+
+			return size;
+		}
 
 		private String getMetaDataDatabaseNameOrDefault() {
 			String aaName = ReflectionUtils.getMetaData(mContext, AA_DB_NAME);
