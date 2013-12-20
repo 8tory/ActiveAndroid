@@ -259,11 +259,11 @@ public abstract class Model {
 		return SQLiteUtils.rawQuerySingle(type, sql, selectionArgs);
 	}
 
-	public static <T extends Model> T loadByActiveAndroid(Class<T> type, long id) {
+	private static <T extends Model> T loadByActiveAndroid(Class<T> type, long id) {
 		return (T) new Select().from(type).where("Id=?", id).executeSingle();
 	}
 
-	public static <T extends Model> T loadByContentProvider(Class<T> type, long id) {
+	private static <T extends Model> T loadByContentProvider(Class<T> type, long id) {
 		String[] projection = {};
 		for (Field field : Cache.getTableInfo(type).getFields()) {
 			final String fieldName = Cache.getTableInfo(type).getColumnName(field);
