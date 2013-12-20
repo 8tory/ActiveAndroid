@@ -97,12 +97,12 @@ public abstract class Model {
 
 	/** @deprecated */
 	public final <T extends Model> CursorList<T> rawQuery(String sql, String[] selectionArgs) {
-		return rawQuery(mTableInfo.getType(), sql, selectionArgs);
+		return SQLiteUtils.rawQuery(mTableInfo.getType(), sql, selectionArgs);
 	}
 
 	/** @deprecated */
 	public final <T extends Model> T rawQuerySingle(String sql, String[] selectionArgs) {
-		return rawQuerySingle(mTableInfo.getType(), sql, selectionArgs);
+		return (T) SQLiteUtils.rawQuerySingle(mTableInfo.getType(), sql, selectionArgs);
 	}
 
 	@SuppressLint("NewApi")
@@ -256,7 +256,7 @@ public abstract class Model {
 
 	/** @deprecated */
 	public static <T extends Model> T rawQuerySingle(Class<? extends Model> type, String sql, String[] selectionArgs) {
-		return SQLiteUtils.rawQuerySingle(type, sql, selectionArgs);
+		return (T) SQLiteUtils.rawQuerySingle(type, sql, selectionArgs);
 	}
 
 	private static <T extends Model> T loadByActiveAndroid(Class<T> type, long id) {
