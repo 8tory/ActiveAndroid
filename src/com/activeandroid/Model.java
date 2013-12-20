@@ -270,7 +270,7 @@ public abstract class Model {
 	// Model population
 
 	public final void loadFromCursor(Cursor cursor) {
-		boolean addEntity = true;
+		int sizeOfColumnNotFound = 0;
 
 		for (Field field : mTableInfo.getFields()) {
 			final String fieldName = mTableInfo.getColumnName(field);
@@ -278,7 +278,7 @@ public abstract class Model {
 			final int columnIndex = cursor.getColumnIndex(fieldName);
 
 			if (columnIndex < 0) {
-				addEntity = false;
+				sizeOfColumnNotFound++;
 				continue;
 			}
 
@@ -366,7 +366,7 @@ public abstract class Model {
 			}
 		}
 
-		if (mId != null && addEntity) {
+		if (mId != null && sizeOfColumnNotFound == 0) {
 			Cache.addEntity(this);
 		}
 	}
