@@ -107,4 +107,6 @@ public @interface Column {
 	 * Execute CREATE INDEX index_table_name_group2 on table_name(member2, member3)
 	 */
 	public String[] indexGroups() default {};
+
+    public boolean readOnly() default false;
 }
