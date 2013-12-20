@@ -28,6 +28,7 @@ import com.activeandroid.query.Select;
 import com.activeandroid.serializer.TypeSerializer;
 import com.activeandroid.util.Log;
 import com.activeandroid.util.ReflectionUtils;
+import com.activeandroid.util.SQLiteUtils;
 import com.novoda.notils.cursor.CursorList;
 
 import android.database.ContentObserver;
@@ -92,6 +93,16 @@ public abstract class Model {
 
 		Cache.getContext().getContentResolver()
 				.notifyChange(ContentProvider.createUri(mTableInfo.getType(), mId), null);
+	}
+
+	/** @deprecated */
+	public final <T extends Model> CursorList<T> rawQuery(String sql, String[] selectionArgs) {
+		return rawQuery(mTableInfo.getType(), sql, selectionArgs);
+	}
+
+	/** @deprecated */
+	public final <T extends Model> T rawQuerySingle(String sql, String[] selectionArgs) {
+		return rawQuerySingle(mTableInfo.getType(), sql, selectionArgs);
 	}
 
 	@SuppressLint("NewApi")
@@ -236,6 +247,16 @@ public abstract class Model {
 
 	public static void delete(Class<? extends Model> type, long id) {
 		new Delete().from(type).where("Id=?", id).execute();
+	}
+
+	/** @deprecated */
+	public static <T extends Model> CursorList<T> rawQuery(Class<? extends Model> type, String sql, String[] selectionArgs) {
+		return SQLiteUtils.rawQuery(type, sql, selectionArgs);
+	}
+
+	/** @deprecated */
+	public static <T extends Model> T rawQuerySingle(Class<? extends Model> type, String sql, String[] selectionArgs) {
+		return SQLiteUtils.rawQuerySingle(type, sql, selectionArgs);
 	}
 
 	public static <T extends Model> T loadByActiveAndroid(Class<T> type, long id) {
