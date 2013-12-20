@@ -40,8 +40,8 @@ public final class Select implements Sqlable {
 	}
 
 	private static List<Column> mapToColumns(Map<String, String> map) {
-		if (map == null) return null;
 		List<Column> columns = new ArrayList<Column>();
+		if (map == null) return columns;
 		for (Map.Entry<String, String> entry : map.entrySet()) {
 			columns.add(new Column(entry.getValue(), entry.getKey()));
 		}
@@ -72,6 +72,10 @@ public final class Select implements Sqlable {
 
 	public From from(Class<? extends Model> table) {
 		return new From(table, this);
+	}
+
+	public From from(Class<? extends Model> table, String from) {
+		return new From(table, this, from);
 	}
 
 	public static class Column {

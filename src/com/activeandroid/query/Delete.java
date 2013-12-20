@@ -26,6 +26,10 @@ public final class Delete implements Sqlable {
 		return new From(table, this);
 	}
 
+	public From from(Class<? extends Model> table, String from) {
+		return new From(table, this, from);
+	}
+
 	@Override
 	public String toSql() {
 		return "DELETE ";

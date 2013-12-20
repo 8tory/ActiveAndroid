@@ -38,6 +38,7 @@ public final class From implements Sqlable {
 	private Class<? extends Model> mType;
 	private String mAlias;
 	private List<Join> mJoins;
+	private String mFrom;
 	private String mWhere;
 	private String mGroupBy;
 	private String mHaving;
@@ -52,7 +53,17 @@ public final class From implements Sqlable {
 	private List<Object> mArguments;
 
 	public From(Class<? extends Model> table, Sqlable queryBase) {
+		this(table, queryBase, null);
+	}
+
+	public From(Class<? extends Model> table, Sqlable queryBase, String from) {
 		mType = table;
+
+		if (from != null)
+			mFrom = from;
+		else
+			mFrom = Cache.getTableName(mType);
+
 		mJoins = new ArrayList<Join>();
 		mQueryBase = queryBase;
 
@@ -178,7 +189,7 @@ public final class From implements Sqlable {
 		StringBuilder sql = new StringBuilder();
 		sql.append(mQueryBase.toSql());
 		sql.append("FROM ");
-		sql.append(Cache.getTableName(mType)).append(" ");
+		sql.append(mFrom).append(" ");
 
 		if (mAlias != null) {
 			sql.append("AS ");
