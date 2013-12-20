@@ -74,13 +74,13 @@ public final class ReflectionUtils {
 		return false;
 	}
 
-    public static List<Field> getAllFields(List<Field> outFields, Class<?> inClass) {
-        for (Field field : inClass.getDeclaredFields()) {
-            outFields.add(field);
-        }
-        if (inClass.getSuperclass() != null && !inClass.getSuperclass().equals(Model.class)) {
-            outFields = getAllFields(outFields, inClass.getSuperclass());
-        }
-        return outFields;
-    }
+	public static List<Field> getAllFields(List<Field> outFields, Class<?> inClass) {
+		for (Field field : inClass.getDeclaredFields()) {
+			outFields.add(field);
+		}
+		if (inClass.getSuperclass() != null && !inClass.getSuperclass().equals(Model.class)) {
+			outFields = getAllFields(outFields, inClass.getSuperclass());
+		}
+		return outFields;
+	}
 }

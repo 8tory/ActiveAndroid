@@ -55,23 +55,22 @@ public final class TableInfo {
 		}
 
 		List<Field> fields = new ArrayList<Field>();
-        try {
-            fields = ReflectionUtils.getAllFields(fields, Class.forName(type.getName()));
-            fields.add(getIdField(type));
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        }
-
+		try {
+			fields = ReflectionUtils.getAllFields(fields, Class.forName(type.getName()));
+			fields.add(getIdField(type));
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		}
 
 		for (Field field : fields) {
 			if (field.isAnnotationPresent(Column.class)) {
 				final Column columnAnnotation = field.getAnnotation(Column.class);
-                String fieldName;
-                if(!columnAnnotation.name().equals("")){
-                    fieldName = columnAnnotation.name();
-                } else{
-                    fieldName = field.getName();
-                }
+				String fieldName;
+				if (!"".equals(columnAnnotation.name())) {
+					fieldName = columnAnnotation.name();
+				} else {
+					fieldName = field.getName();
+				}
 				mColumnNames.put(field, fieldName);
 			}
 		}
