@@ -14,6 +14,7 @@ import com.activeandroid.Cache;
 import com.activeandroid.Configuration;
 import com.activeandroid.Model;
 import com.activeandroid.TableInfo;
+import com.activeandroid.util.SQLiteUtils;
 
 public class ContentProvider extends android.content.ContentProvider {
 	//////////////////////////////////////////////////////////////////////////////////////
@@ -93,7 +94,7 @@ public class ContentProvider extends android.content.ContentProvider {
 	@Override
 	public Uri insert(Uri uri, ContentValues values) {
 		final Class<? extends Model> type = getModelType(uri);
-		final Long id = Cache.openDatabase().insert(Cache.getTableName(type), null, values);
+		final Long id = SQLiteUtils.insert(Cache.getTableName(type), null, values);
 
 		if (id != null && id > 0) {
 			Uri retUri = createUri(type, id);
@@ -122,7 +123,7 @@ public class ContentProvider extends android.content.ContentProvider {
 	@Override
 	public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
 		final Class<? extends Model> type = getModelType(uri);
-		final int count = Cache.openDatabase().update(Cache.getTableName(type), values, selection, selectionArgs);
+		final int count = SQLiteUtils.update(Cache.getTableName(type), values, selection, selectionArgs);
 
 		notifyChange(uri);
 
@@ -132,7 +133,7 @@ public class ContentProvider extends android.content.ContentProvider {
 	@Override
 	public int delete(Uri uri, String selection, String[] selectionArgs) {
 		final Class<? extends Model> type = getModelType(uri);
-		final int count = Cache.openDatabase().delete(Cache.getTableName(type), selection, selectionArgs);
+		final int count = SQLiteUtils.delete(Cache.getTableName(type), selection, selectionArgs);
 
 		notifyChange(uri);
 
@@ -142,7 +143,7 @@ public class ContentProvider extends android.content.ContentProvider {
 	@Override
 	public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
 		final Class<? extends Model> type = getModelType(uri);
-		final Cursor cursor = Cache.openDatabase().query(
+		final Cursor cursor = SQLiteUtils.query(
 				Cache.getTableName(type),
 				projection,
 				selection,

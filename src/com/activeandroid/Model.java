@@ -88,7 +88,8 @@ public abstract class Model {
 	}
 
 	public final void delete() {
-		Cache.openDatabase().delete(mTableInfo.getTableName(), "Id=?", new String[] { getId().toString() });
+		//delete(mTableInfo.getType(), mId);
+		SQLiteUtils.delete(mTableInfo.getTableName(), "Id=?", new String[] { getId().toString() });
 		Cache.removeEntity(this);
 
 		Cache.getContext().getContentResolver()
@@ -195,7 +196,6 @@ public abstract class Model {
 	// super me: super.save();
 	@SuppressLint("NewApi")
 	public void save() {
-		final SQLiteDatabase db = Cache.openDatabase();
 		final ContentValues values = toContentValues();
 
 		// TODO optimize the following code snippet
@@ -203,7 +203,7 @@ public abstract class Model {
 			mId = mSpecificId;
 			values.put("Id", mId);
 			if (!ActiveAndroid.inContentProvider()) {
-				db.replace(mTableInfo.getTableName(), null, values);
+				SQLiteUtils.replace(mTableInfo.getTableName(), null, values);
 			} else {
 				Model m = load(mTableInfo.getType(), mId);
 				if (m == null) {
@@ -217,13 +217,13 @@ public abstract class Model {
 				mId = mSpecificId;
 				values.put("Id", mId);
 				if (!ActiveAndroid.inContentProvider()) {
-					db.insert(mTableInfo.getTableName(), null, values);
+					SQLiteUtils.insert(mTableInfo.getTableName(), null, values);
 				} else {
 					Cache.getContext().getContentResolver().insert(ContentProvider.createUri(mTableInfo.getType(), null), values);
 				}
 			} else {
 				if (!ActiveAndroid.inContentProvider()) {
-					mId = db.insert(mTableInfo.getTableName(), null, values);
+					mId = SQLiteUtils.insert(mTableInfo.getTableName(), null, values);
 				} else {
 					mId = android.content.ContentUris.parseId(
 							Cache.getContext().getContentResolver().insert(
@@ -233,7 +233,7 @@ public abstract class Model {
 			}
 		} else { // update for mId
 			if (!ActiveAndroid.inContentProvider()) {
-				db.update(mTableInfo.getTableName(), values, "Id=" + mId, null);
+				SQLiteUtils.update(mTableInfo.getTableName(), values, "Id=" + mId, null);
 			} else {
 				Cache.getContext().getContentResolver().update(ContentProvider.createUri(mTableInfo.getType(), null), values, "Id=" + mId, null);
 			}

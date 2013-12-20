@@ -17,8 +17,10 @@ package com.activeandroid.util;
  */
 
 import android.annotation.SuppressLint;
+import android.content.ContentValues;
 import android.database.Cursor;
 import android.os.Build;
+import android.os.Looper;
 import android.text.TextUtils;
 
 import com.activeandroid.ActiveAndroid;
@@ -94,6 +96,34 @@ public final class SQLiteUtils {
 	// PUBLIC METHODS
 	//////////////////////////////////////////////////////////////////////////////////////
 
+	// TODO Merge code snippet of cache transaction
+	public static class Yield {
+		boolean yielded = false;
+
+		Yield() {
+		}
+
+		public Yield begin() {
+			if (Looper.myLooper() == Looper.getMainLooper()) {
+				Cache.beginReleaseTransaction();
+				yielded = true;
+			}
+
+			return this;
+		}
+
+		public Yield success() {
+			//if (yielded)
+			// TODO
+			return this;
+		}
+
+		public Yield end() {
+			if (yielded) Cache.endReleaseTransaction();
+			return this;
+		}
+	}
+
 	public static void execSql(String sql) {
 		Cache.openDatabase().execSQL(sql);
 	}
@@ -103,10 +133,90 @@ public final class SQLiteUtils {
 	}
 
 	public static <T extends Model> CursorList<T> rawQuery(Class<? extends Model> type, String sql, String[] selectionArgs) {
-		Cursor cursor = Cache.openDatabase().rawQuery(sql, selectionArgs);
-		CursorList<T> entities = processCursor(type, cursor);
+		CursorList<T> entities;
+
+		Yield yield = new Yield().begin();
+		try {
+			Cursor cursor = Cache.openDatabase().rawQuery(sql, selectionArgs);
+			entities = processCursor(type, cursor);
+			yield.success();
+		} finally {
+			yield.end();
+		}
 
 		return entities;
+	}
+
+	public static int delete(String tableName, String sql, String[] selectionArgs) {
+		int rows;
+
+		Yield yield = new Yield().begin();
+		try {
+			rows = Cache.openDatabase().delete(tableName, sql, selectionArgs);
+			yield.success();
+		} finally {
+			yield.end();
+		}
+
+		return rows;
+	}
+
+	public static long insert(String table, String nullColumnHook, ContentValues values) {
+		long id;
+
+		Yield yield = new Yield().begin();
+		try {
+			id = Cache.openDatabase().insert(table, nullColumnHook, values);
+			yield.success();
+		} finally {
+			yield.end();
+		}
+
+		return id;
+	}
+
+	public static long replace(String table, String nullColumnHook, ContentValues values) {
+		long id;
+
+		Yield yield = new Yield().begin();
+		try {
+			id = Cache.openDatabase().replace(table, nullColumnHook, values);
+			yield.success();
+		} finally {
+			yield.end();
+		}
+
+		return id;
+	}
+
+	public static int update(String table, ContentValues values, String whereClause, String[] where) {
+		int rows;
+
+		Yield yield = new Yield().begin();
+		try {
+			rows = Cache.openDatabase().update(table, values, whereClause, where);
+			yield.success();
+		} finally {
+			yield.end();
+		}
+
+		return rows;
+	}
+
+	public static Cursor query(String table, String[] projection, String selection, String[] selectionArgs,
+			String groupBy, String having, String sortOrder) {
+		Cursor cursor;
+
+		Yield yield = new Yield().begin();
+		try {
+			cursor = Cache.openDatabase().query(table, projection, selection, selectionArgs,
+					groupBy, having, sortOrder);
+			yield.success();
+		} finally {
+			yield.end();
+		}
+
+		return cursor;
 	}
 
 	public static <T extends Model> T rawQuerySingle(Class<? extends Model> type, String sql, String[] selectionArgs) {
