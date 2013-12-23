@@ -87,7 +87,8 @@ public abstract class Model {
 		mReplace = replace;
 	}
 
-	public final void delete() {
+	// super me: super.delete();
+	public void delete() {
 		//delete(mTableInfo.getType(), mId);
 		SQLiteUtils.delete(mTableInfo.getTableName(), "Id=?", new String[] { getId().toString() });
 		Cache.removeEntity(this);
