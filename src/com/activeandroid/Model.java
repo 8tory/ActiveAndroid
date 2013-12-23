@@ -19,7 +19,6 @@ package com.activeandroid;
 import android.annotation.SuppressLint;
 import android.content.ContentValues;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 
 import com.activeandroid.annotation.Column;
 import com.activeandroid.content.ContentProvider;
