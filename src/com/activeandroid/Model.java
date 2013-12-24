@@ -101,9 +101,8 @@ public abstract class Model {
 		for (Field field : mTableInfo.getFields()) {
 			final String fieldName = mTableInfo.getColumnName(field);
 			Class<?> fieldType = field.getType();
-			final Column column = field.getAnnotation(Column.class);
 
-			if (column.readOnly())
+			if (mTableInfo.isReadOnlyColumn(fieldName))
 				continue;
 
 			field.setAccessible(true);
