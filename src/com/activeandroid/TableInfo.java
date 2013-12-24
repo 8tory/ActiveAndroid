@@ -37,6 +37,8 @@ public final class TableInfo {
 	private String mTableName;
 
 	private Map<Field, String> mColumnNames = new HashMap<Field, String>();
+	private Map<String, Column> mColumns = new HashMap<String, Column>();
+	private Map<String, Boolean> mReadOnlyColumns = new HashMap<String, Boolean>();
 
 	//////////////////////////////////////////////////////////////////////////////////////
 	// CONSTRUCTORS
@@ -71,6 +73,8 @@ public final class TableInfo {
 					fieldName = field.getName();
 				}
 				mColumnNames.put(field, fieldName);
+				mColumns.put(fieldName, columnAnnotation);
+				mReadOnlyColumns.put(fieldName, columnAnnotation.readOnly());
 			}
 		}
 	}
@@ -95,6 +99,13 @@ public final class TableInfo {
 		return mColumnNames.get(field);
 	}
 
+	public Column getColumn(String name) {
+		return mColumns.get(name);
+	}
+
+	public boolean isReadOnlyColumn(String name) {
+		return mReadOnlyColumns.get(name);
+	}
 	//////////////////////////////////////////////////////////////////////////////////////
 	// PRIVATE METHODS
 	//////////////////////////////////////////////////////////////////////////////////////
