@@ -31,7 +31,9 @@ import com.activeandroid.annotation.Column;
 import com.activeandroid.annotation.Column.ConflictAction;
 import com.activeandroid.serializer.TypeSerializer;
 import com.novoda.notils.cursor.CursorList;
-import com.novoda.notils.cursor.SmartCursorList;
+import com.novoda.notils.cursor.SimpleCursorList;
+import com.novoda.notils.cursor.SmartCursorWrapper;
+
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -418,16 +420,17 @@ public final class SQLiteUtils {
 	}
 
 	public static <T extends Model> CursorList<T> processCursor(Class<? extends Model> type, Cursor cursor) {
-		return new SmartCursorList<T>(cursor, new ModelCursorMarshaller<T>(type),
-				new SmartCursorList.OnCloseListener() {
-					@Override
-					public void onClose() {
-						ActiveAndroid.beginReleaseTransaction();
-					}
-					@Override
-					public void onCloseFinished() {
-						ActiveAndroid.endReleaseTransaction();
-					}
-				});
+		SmartCursorWrapper cursorWrapper = new SmartCursorWrapper(cursor);
+		cursorWrapper.setOnCloseListener(new SmartCursorWrapper.OnCloseListener() {
+			@Override
+			public void onClose() {
+				ActiveAndroid.beginReleaseTransaction();
+			}
+			@Override
+			public void onCloseFinished() {
+				ActiveAndroid.endReleaseTransaction();
+			}
+		});
+		return new SimpleCursorList<T>(cursorWrapper, new ModelCursorMarshaller<T>(type));
 	}
 }
