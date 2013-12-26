@@ -94,6 +94,8 @@ public final class SQLiteUtils {
 	private static HashMap<String, List<String>> sUniqueGroupMap;
 	private static HashMap<String, ConflictAction> sOnUniqueConflictsMap;
 
+	private static List<Integer> sNoException = new ArrayList<Integer>();
+
 	//////////////////////////////////////////////////////////////////////////////////////
 	// PUBLIC METHODS
 	//////////////////////////////////////////////////////////////////////////////////////
@@ -164,12 +166,16 @@ public final class SQLiteUtils {
 	}
 
 	public static long insert(String table, String nullColumnHook, ContentValues values) {
-		long id;
+		long id = -1;
 
 		Yield yield = new Yield().begin();
 		try {
-			id = Cache.openDatabase().insert(table, nullColumnHook, values);
+			if (showException())
+				id = Cache.openDatabase().insert(table, nullColumnHook, values);
+			else
+				id = Cache.openDatabase().insertOrThrow(table, nullColumnHook, values);
 			yield.success();
+		} catch (Exception e) {
 		} finally {
 			yield.end();
 		}
@@ -178,12 +184,16 @@ public final class SQLiteUtils {
 	}
 
 	public static long replace(String table, String nullColumnHook, ContentValues values) {
-		long id;
+		long id = -1;
 
 		Yield yield = new Yield().begin();
 		try {
-			id = Cache.openDatabase().replace(table, nullColumnHook, values);
+			if (showException())
+				id = Cache.openDatabase().replace(table, nullColumnHook, values);
+			else
+				id = Cache.openDatabase().replaceOrThrow(table, nullColumnHook, values);
 			yield.success();
+		} catch (Exception e) {
 		} finally {
 			yield.end();
 		}
@@ -432,5 +442,28 @@ public final class SQLiteUtils {
 			}
 		});
 		return new SimpleCursorList<T>(cursorWrapper, new ModelCursorMarshaller<T>(type));
+	}
+
+	public static void showException(boolean show) {
+		final Integer tid = android.os.Process.myTid();
+
+		final int index = sNoException.indexOf(tid);
+		if (show) {
+			if (index != -1)
+				sNoException.remove(index);
+		} else {
+			if (index == -1)
+				sNoException.add(tid);
+		}
+	}
+
+	private static boolean showException() {
+		final Integer tid = android.os.Process.myTid();
+
+		final int index = sNoException.indexOf(tid);
+		if (index != -1)
+			return false;
+		else
+			return true;
 	}
 }
