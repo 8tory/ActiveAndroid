@@ -124,7 +124,9 @@ public final class DatabaseHelper extends SQLiteOpenHelper {
 	private void executePragmas(SQLiteDatabase db) {
 		if (SQLiteUtils.FOREIGN_KEYS_SUPPORTED) {
 			db.execSQL("PRAGMA foreign_keys=ON;");
-			Log.i("Foreign Keys supported. Enabling foreign key features.");
+			Log.setEnabled(true);
+			Log.i("PRAGMA: Foreign Keys supported. Enabling foreign key features.: " + android.util.Log.getStackTraceString(new RuntimeException().fillInStackTrace()));
+			Log.setEnabled(false);
 		}
 	}
 

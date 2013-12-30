@@ -23,6 +23,7 @@ import java.util.List;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteStatement;
 import android.support.v4.util.LruCache;
 
 import com.activeandroid.serializer.TypeSerializer;
@@ -157,8 +158,24 @@ public final class Cache {
 
 	// Database access
 
+	private static String sForeignKeyEnabled;
+
 	public static synchronized SQLiteDatabase openDatabase() {
-		return sDatabaseHelper.getWritableDatabase();
+		SQLiteDatabase db = sDatabaseHelper.getWritableDatabase();
+		Log.setEnabled(true);
+		//db.execSQL("PRAGMA foreign_keys=ON");
+		//db.execSQL("PRAGMA foreign_keys");
+		SQLiteStatement statement = db.compileStatement("PRAGMA foreign_keys");
+		String result = statement.simpleQueryForString();
+		if (sForeignKeyEnabled == null) {
+			sForeignKeyEnabled = result;
+			Log.e("PRAGMA foreign_keys: " + sForeignKeyEnabled);
+		}
+		if (!result.equals(sForeignKeyEnabled)) Log.e("Change to PRAGMA foreign_keys: " + result, new RuntimeException().fillInStackTrace());
+		sForeignKeyEnabled = result;
+		//db.setForeignKeyConstraintsEnabled(); API 16
+		Log.setEnabled(false);
+		return db;
 	}
 
 	public static synchronized void closeDatabase() {
