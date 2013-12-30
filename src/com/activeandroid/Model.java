@@ -231,10 +231,25 @@ public abstract class Model {
 				}
 			}
 		} else { // update for mId
+			if (mSpecificId != null && !mReplace) {
+				if (!ActiveAndroid.inContentProvider()) {
+					delete();
+					mId = mSpecificId;
+					values.put("Id", mId);
+					SQLiteUtils.insert(mTableInfo.getTableName(), null, values);
+				} else {
+					// FIXME for inContentProvider
+					delete();
+					mId = mSpecificId;
+					values.put("Id", mId);
+					Cache.getContext().getContentResolver().insert(ContentProvider.createUri(mTableInfo.getType(), null), values);
+				}
+			} else {
 			if (!ActiveAndroid.inContentProvider()) {
 				SQLiteUtils.update(mTableInfo.getTableName(), values, "Id=" + mId, null);
 			} else {
 				Cache.getContext().getContentResolver().update(ContentProvider.createUri(mTableInfo.getType(), null), values, "Id=" + mId, null);
+			}
 			}
 		}
 
