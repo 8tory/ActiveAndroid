@@ -136,6 +136,15 @@ public final class SQLiteUtils {
 		Cache.openDatabase().execSQL(sql, bindArgs);
 	}
 
+	public static void rename(Class<? extends Model> from, Class<? extends Model> to) {
+		drop(to);
+		execSql("ALTER TABLE " + Cache.getTableInfo(from).getTableName() + "RENAME TO " + Cache.getTableInfo(to).getTableName());
+	}
+
+	public static void drop(Class<? extends Model> type) {
+		execSql("DROP TABLE IF EXISTS " + Cache.getTableInfo(type).getTableName());
+	}
+
 	public static <T extends Model> CursorList<T> rawQuery(Class<? extends Model> type, String sql, String[] selectionArgs) {
 		CursorList<T> entities;
 
