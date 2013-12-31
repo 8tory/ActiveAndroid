@@ -43,7 +43,8 @@ public final class Cache {
 	private static boolean sIsInitialized = false;
 
 	private static Object yieldTransactionLock = new Object();
-	private static List<Integer> yieldTransaction = new ArrayList<Integer>();
+	private static int sYieldTransactionCount;
+	private static int sTransactionTid;
 
 	private static Configuration sConfiguration;
 	private static String sDatabaseName;
@@ -214,32 +215,47 @@ public final class Cache {
 		return sModelInfo.getTableInfo(type).getTableName();
 	}
 
-	public static void beginReleaseTransaction() {
+	public static Object getLock() {
+		return yieldTransactionLock;
+	}
+
+	public static void beginTransaction() {
 		synchronized (yieldTransactionLock) {
 			final int tid = android.os.Process.myTid();
-			if (yieldTransaction.contains(tid))
+			if (tid == sTransactionTid)
 				return;
-			yieldTransaction.add(tid);
+			sTransactionTid = tid;
+		}
+	}
+
+	public static void endTransaction() {
+		synchronized (yieldTransactionLock) {
+			final int tid = android.os.Process.myTid();
+			if (tid != sTransactionTid)
+				return;
+			sTransactionTid = 0;
+		}
+	}
+
+	public static void beginReleaseTransaction() {
+		synchronized (yieldTransactionLock) {
+			sYieldTransactionCount++;
 		}
 	}
 
 	public static void endReleaseTransaction() {
 		synchronized (yieldTransactionLock) {
-			final int tid = android.os.Process.myTid();
-			if (!yieldTransaction.remove(Integer.valueOf(tid)))
+			sYieldTransactionCount--;
+			if (sYieldTransactionCount > 0)
 				return;
-			if (yieldTransaction.isEmpty())
-				yieldTransactionLock.notifyAll();
+			sYieldTransactionCount = 0;
+			yieldTransactionLock.notifyAll();
 		}
 	}
 
 	public static void yieldTransaction() {
 		synchronized (yieldTransactionLock) {
-			if (yieldTransaction.isEmpty())
-				return;
-
-			final int tid = android.os.Process.myTid();
-			if (yieldTransaction.contains(tid))
+			if (sYieldTransactionCount <= 0)
 				return;
 
 			final SQLiteDatabase db = sDatabaseHelper.getWritableDatabase();
@@ -249,6 +265,7 @@ public final class Cache {
 			try {
 				db.setTransactionSuccessful();
 			} finally {
+				sTransactionTid = 0;
 				db.endTransaction();
 			}
 
@@ -258,6 +275,9 @@ public final class Cache {
 			}
 
 			db.beginTransaction();
+
+			final int tid = android.os.Process.myTid();
+			sTransactionTid = tid;
 		}
 	}
 }
