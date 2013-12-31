@@ -161,13 +161,6 @@ public final class Cache {
 		return sDatabaseHelper.getWritableDatabase();
 	}
 
-	public static boolean isForeignKeyConstraintsEnabled() {
-		SQLiteDatabase db = openDatabase();
-		SQLiteStatement statement = db.compileStatement("PRAGMA foreign_keys");
-		String result = statement.simpleQueryForString();
-		return !"0".equals(result) || !"off".equalsIgnoreCase(result);
-	}
-
 	public static synchronized void closeDatabase() {
 		sDatabaseHelper.close();
 	}
