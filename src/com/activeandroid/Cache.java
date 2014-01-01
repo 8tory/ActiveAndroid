@@ -45,6 +45,7 @@ public final class Cache {
 	private static Object yieldTransactionLock = new Object();
 	private static int sYieldTransactionCount;
 	private static int sTransactionTid;
+	private static int sTransactionCount;
 
 	private static Configuration sConfiguration;
 	private static String sDatabaseName;
@@ -221,18 +222,19 @@ public final class Cache {
 
 	public static void beginTransaction() {
 		synchronized (yieldTransactionLock) {
-			final int tid = android.os.Process.myTid();
-			if (tid == sTransactionTid)
+			sTransactionCount++;
+			if (sTransactionCount > 1)
 				return;
-			sTransactionTid = tid;
+			sTransactionTid = android.os.Process.myTid();
 		}
 	}
 
 	public static void endTransaction() {
 		synchronized (yieldTransactionLock) {
-			final int tid = android.os.Process.myTid();
-			if (tid != sTransactionTid)
+			sTransactionCount--;
+			if (sTransactionCount > 0)
 				return;
+			sTransactionCount = 0;
 			sTransactionTid = 0;
 		}
 	}
