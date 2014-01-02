@@ -17,16 +17,17 @@ package com.activeandroid;
  */
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.support.v4.util.LruCache;
+import android.util.SparseArray;
+import android.util.SparseIntArray;
 
 import com.activeandroid.serializer.TypeSerializer;
 import com.activeandroid.util.Log;
+import com.activeandroid.util.SQLiteUtils.Yield;
 
 public final class Cache {
 	//////////////////////////////////////////////////////////////////////////////////////
@@ -43,9 +44,8 @@ public final class Cache {
 	private static boolean sIsInitialized = false;
 
 	private static Object yieldTransactionLock = new Object();
-	private static int sYieldTransactionCount;
-	private static int sTransactionTid;
-	private static int sTransactionCount;
+	private static SparseArray<Yield> sYield = new SparseArray<Yield>();
+	private static SparseIntArray sYieldTransaction = new SparseIntArray();
 
 	private static Configuration sConfiguration;
 	private static String sDatabaseName;
@@ -216,70 +216,112 @@ public final class Cache {
 		return sModelInfo.getTableInfo(type).getTableName();
 	}
 
-	public static Object getLock() {
-		return yieldTransactionLock;
-	}
-
 	public static void beginTransaction() {
-		synchronized (yieldTransactionLock) {
-			sTransactionCount++;
-			if (sTransactionCount > 1)
-				return;
-			sTransactionTid = android.os.Process.myTid();
-		}
+		final int tid = android.os.Process.myTid();
+
+		final Yield yield = new Yield();
+		yield.begin();
+
+		sYield.put(tid, yield);
 	}
 
 	public static void endTransaction() {
-		synchronized (yieldTransactionLock) {
-			sTransactionCount--;
-			if (sTransactionCount > 0)
-				return;
-			sTransactionCount = 0;
-			sTransactionTid = 0;
-		}
+		final int tid = android.os.Process.myTid();
+
+		final Yield yield = sYield.get(tid);
+		if (yield == null)
+			return;
+
+		yield.end();
+
+		sYield.delete(tid);
+	}
+
+	public static void setTransactionSuccessful() {
+		final int tid = android.os.Process.myTid();
+
+		final Yield yield = sYield.get(tid);
+		if (yield == null)
+			return;
+
+		yield.success();
 	}
 
 	public static void beginReleaseTransaction() {
 		synchronized (yieldTransactionLock) {
-			sYieldTransactionCount++;
+			final int tid = android.os.Process.myTid();
+			final int count = sYieldTransaction.get(tid);
+			sYieldTransaction.put(tid, count + 1);
 		}
 	}
 
 	public static void endReleaseTransaction() {
 		synchronized (yieldTransactionLock) {
-			sYieldTransactionCount--;
-			if (sYieldTransactionCount > 0)
+			final int tid = android.os.Process.myTid();
+
+			final int count = sYieldTransaction.get(tid);
+			if (count > 1) {
+				sYieldTransaction.put(tid, count - 1);
 				return;
-			sYieldTransactionCount = 0;
+			}
+
+			sYieldTransaction.delete(tid);
+			if (sYieldTransaction.size() != 0)
+				return;
+
 			yieldTransactionLock.notifyAll();
 		}
 	}
 
 	public static void yieldTransaction() {
 		synchronized (yieldTransactionLock) {
-			if (sYieldTransactionCount <= 0)
+			if (!needYieldTransaction())
 				return;
 
 			final SQLiteDatabase db = sDatabaseHelper.getWritableDatabase();
-			if (!db.inTransaction())
-				return;
 
 			try {
 				db.setTransactionSuccessful();
 			} finally {
-				sTransactionTid = 0;
 				db.endTransaction();
 			}
 
-			try {
-				yieldTransactionLock.wait();
-			} catch (Exception e) {
+			while (!canTransaction()) {
+				try {
+					yieldTransactionLock.wait();
+				} catch (Exception e) {
+				}
 			}
 
 			db.beginTransaction();
+		}
+	}
+
+	private static boolean needYieldTransaction() {
+		synchronized (yieldTransactionLock) {
+			final int size = sYieldTransaction.size();
+			if (size == 0)
+				return false;
 
 			final int tid = android.os.Process.myTid();
-			sTransactionTid = tid;
+			if (size == 1 && sYieldTransaction.get(tid) > 0)
+				return false;
+
+			return true;
+		}
+	}
+
+	private static boolean canTransaction() {
+		synchronized (yieldTransactionLock) {
+			final int size = sYieldTransaction.size();
+			if (size == 0)
+				return true;
+
+			final int tid = android.os.Process.myTid();
+			if (sYieldTransaction.get(tid) > 0)
+				return true;
+
+			return false;
 		}
 	}
 }

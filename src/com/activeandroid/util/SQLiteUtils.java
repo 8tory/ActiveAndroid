@@ -104,7 +104,7 @@ public final class SQLiteUtils {
 	public static class Yield {
 		boolean yielded = false;
 
-		Yield() {
+		public Yield() {
 		}
 
 		public Yield begin() {

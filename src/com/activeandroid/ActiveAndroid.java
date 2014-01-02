@@ -68,17 +68,18 @@ public final class ActiveAndroid {
 	}
 
 	public static void beginTransaction() {
-		Cache.openDatabase().beginTransaction();
 		Cache.beginTransaction();
+		Cache.openDatabase().beginTransaction();
 	}
 
 	public static void endTransaction() {
-		Cache.endTransaction();
 		Cache.openDatabase().endTransaction();
+		Cache.endTransaction();
 	}
 
 	public static void setTransactionSuccessful() {
 		Cache.openDatabase().setTransactionSuccessful();
+		Cache.setTransactionSuccessful();
 	}
 
 	public static boolean inTransaction() {
