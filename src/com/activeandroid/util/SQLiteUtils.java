@@ -123,7 +123,10 @@ public final class SQLiteUtils {
 		}
 
 		public Yield end() {
-			if (yielded) Cache.endReleaseTransaction();
+			if (yielded) {
+				Cache.endReleaseTransaction();
+				yielded = false;
+			}
 			return this;
 		}
 	}
