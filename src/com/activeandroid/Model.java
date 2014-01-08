@@ -31,6 +31,7 @@ import com.activeandroid.util.SQLiteUtils;
 import com.novoda.notils.cursor.CursorList;
 
 import android.database.ContentObserver;
+import android.net.Uri;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -224,10 +225,8 @@ public abstract class Model {
 				if (!ActiveAndroid.inContentProvider()) {
 					mId = SQLiteUtils.insert(mTableInfo.getTableName(), null, values);
 				} else {
-					mId = android.content.ContentUris.parseId(
-							Cache.getContext().getContentResolver().insert(
-								ContentProvider.createUri(mTableInfo.getType(), null),
-								values));
+					Uri uri = Cache.getContext().getContentResolver().insert(ContentProvider.createUri(mTableInfo.getType(), null), values);
+					if (uri != null) mId = android.content.ContentUris.parseId(uri);
 				}
 			}
 		} else { // update for mId
