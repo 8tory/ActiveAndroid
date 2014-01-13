@@ -97,6 +97,26 @@ public abstract class Model {
 				.notifyChange(ContentProvider.createUri(mTableInfo.getType(), mId), null);
 	}
 
+	/**
+	 * reset()
+	 * insertable()
+	 * setInsert()
+	 * setInsertion()
+	 * refill()
+	 * reference()
+	 * reflect()
+	 * refer()
+	 * reproduce()
+	 * duplicate()
+	 * direct()
+	 * direct()
+	 * autoIncrement()
+	 */
+	public final void autoIncrement() {
+		setReplace(false);
+		mId = null;
+	}
+
 	/** @deprecated */
 	public final <T extends Model> CursorList<T> rawQuery(String sql, String[] selectionArgs) {
 		return SQLiteUtils.rawQuery(mTableInfo.getType(), sql, selectionArgs);
