@@ -45,6 +45,7 @@ public final class Cache {
 
 	private static Object yieldTransactionLock = new Object();
 	private static SparseArray<Yield> sYield = new SparseArray<Yield>();
+	private static SparseIntArray sYieldCount = new SparseIntArray();
 	private static SparseIntArray sYieldTransaction = new SparseIntArray();
 
 	private static Configuration sConfiguration;
@@ -219,31 +220,43 @@ public final class Cache {
 	public static void beginTransaction() {
 		final int tid = android.os.Process.myTid();
 
-		final Yield yield = new Yield();
-		yield.begin();
+		final int count = sYieldCount.get(tid);
 
-		sYield.put(tid, yield);
+		if (count == 0) {
+			final Yield yield = new Yield();
+			yield.begin();
+			sYield.put(tid, yield);
+		}
+
+		sYieldCount.put(tid, count + 1);
 	}
 
 	public static void endTransaction() {
 		final int tid = android.os.Process.myTid();
 
-		final Yield yield = sYield.get(tid);
-		if (yield == null)
+		final int count = sYieldCount.get(tid);
+
+		if (count > 1) {
+			sYieldCount.put(tid, count - 1);
 			return;
+		}
 
+		final Yield yield = sYield.get(tid);
 		yield.end();
-
 		sYield.delete(tid);
+
+		sYieldCount.delete(tid);
 	}
 
 	public static void setTransactionSuccessful() {
 		final int tid = android.os.Process.myTid();
 
-		final Yield yield = sYield.get(tid);
-		if (yield == null)
+		final int count = sYieldCount.get(tid);
+
+		if (count > 1)
 			return;
 
+		final Yield yield = sYield.get(tid);
 		yield.success();
 	}
 
