@@ -217,7 +217,7 @@ public final class Cache {
 		return sModelInfo.getTableInfo(type).getTableName();
 	}
 
-	public static void beginTransaction() {
+	public static synchronized void beginTransaction() {
 		final int tid = android.os.Process.myTid();
 
 		final int count = sYieldCount.get(tid);
@@ -231,7 +231,7 @@ public final class Cache {
 		sYieldCount.put(tid, count + 1);
 	}
 
-	public static void endTransaction() {
+	public static synchronized void endTransaction() {
 		final int tid = android.os.Process.myTid();
 
 		final int count = sYieldCount.get(tid);
@@ -248,7 +248,7 @@ public final class Cache {
 		sYieldCount.delete(tid);
 	}
 
-	public static void setTransactionSuccessful() {
+	public static synchronized void setTransactionSuccessful() {
 		final int tid = android.os.Process.myTid();
 
 		final int count = sYieldCount.get(tid);
