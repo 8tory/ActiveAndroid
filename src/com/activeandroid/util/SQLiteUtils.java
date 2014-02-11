@@ -244,15 +244,15 @@ public final class SQLiteUtils {
 	}
 
 	public static <T extends Model> T rawQuerySingle(Class<? extends Model> type, String sql, String[] selectionArgs) {
+		T item = null;
+
 		CursorList<T> entities = rawQuery(type, sql, selectionArgs);
-
 		if (entities.size() > 0) {
-			T item = entities.get(0);
-			entities.close();
-			return item;
+			item = entities.get(0);
 		}
+		entities.close();
 
-		return null;
+		return item;
 	}
 
 	// Database creation
