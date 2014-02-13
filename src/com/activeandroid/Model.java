@@ -54,6 +54,8 @@ public abstract class Model {
 
 	private TableInfo mTableInfo;
 
+	private boolean enable = true;
+
 	//////////////////////////////////////////////////////////////////////////////////////
 	// CONSTRUCTORS
 	//////////////////////////////////////////////////////////////////////////////////////
@@ -85,6 +87,18 @@ public abstract class Model {
 
 	public final void setReplace(boolean replace) {
 		mReplace = replace;
+	}
+
+	public final void setEnabled(boolean enable) {
+		this.enable = enable;
+	}
+
+	public final void enable() {
+		setEnabled(true);
+	}
+
+	public final void disable() {
+		setEnabled(false);
 	}
 
 	// super me: super.delete();
@@ -216,6 +230,7 @@ public abstract class Model {
 	// super me: super.save();
 	@SuppressLint("NewApi")
 	public void save() {
+		if (!enable) return;
 		final ContentValues values = toContentValues();
 
 		// TODO optimize the following code snippet
