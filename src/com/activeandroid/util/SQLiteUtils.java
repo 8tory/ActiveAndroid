@@ -431,7 +431,7 @@ public final class SQLiteUtils {
 
 		definitions.addAll(createUniqueDefinition(tableInfo));
 
-		if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.FROYO) {
+		if (Build.VERSION.SDK_INT <= 10) {
 			return String.format("CREATE VIRTUAL TABLE %s USING %s(%s);", tableInfo.getTableName(),
 					tableInfo.getModule(), TextUtils.join(", ", definitions));
 		} else {

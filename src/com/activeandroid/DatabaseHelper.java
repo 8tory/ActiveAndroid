@@ -175,7 +175,7 @@ public final class DatabaseHelper extends SQLiteOpenHelper {
 		db.beginTransaction();
 		try {
 			for (TableInfo tableInfo : Cache.getTableInfos()) {
-				if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.FROYO) {
+				if (Build.VERSION.SDK_INT <= 10) {
 					if (existVirtualTable(db, tableInfo)) continue;
 				}
 				String toSql = SQLiteUtils.createVirtualTableDefinition(tableInfo);
