@@ -29,6 +29,7 @@ import java.util.List;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteDoneException;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteStatement;
 import android.os.Build;
@@ -193,11 +194,19 @@ public final class DatabaseHelper extends SQLiteOpenHelper {
 		String tableName = tableInfo.getTableName();
 		SQLiteStatement statement = db.compileStatement(
 					"SELECT DISTINCT tbl_name from sqlite_master where tbl_name = '" + tableName + "'");
-		String result = statement.simpleQueryForString();
-		if (!tableName.equals(result)) {
-			statement = db.compileStatement(
-					"SELECT DISTINCT tablename from sqlite_master where tablename = '" + tableName + "'");
+        String result = null;
+		try {
 			result = statement.simpleQueryForString();
+		} catch (SQLiteDoneException e) {
+			if (!tableName.equals(result)) {
+				statement = db.compileStatement(
+						"SELECT DISTINCT tablename from sqlite_master where tablename = '" + tableName + "'");
+				try {
+					result = statement.simpleQueryForString();
+				} catch (SQLiteDoneException e2) {
+					//e.printStackTrace();
+				}
+			}
 		}
 		return tableName.equals(result);
 	}
