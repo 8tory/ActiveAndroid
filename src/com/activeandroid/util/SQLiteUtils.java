@@ -29,6 +29,7 @@ import com.activeandroid.Model;
 import com.activeandroid.TableInfo;
 import com.activeandroid.annotation.Column;
 import com.activeandroid.annotation.Column.ConflictAction;
+import com.activeandroid.annotation.Table;
 import com.activeandroid.serializer.TypeSerializer;
 import com.novoda.notils.cursor.CursorList;
 import com.novoda.notils.cursor.SimpleCursorList;
@@ -413,6 +414,25 @@ public final class SQLiteUtils {
 
 		return String.format("CREATE TABLE IF NOT EXISTS %s (%s);", tableInfo.getTableName(),
 				TextUtils.join(", ", definitions));
+	}
+
+	public static String createVirtualTableDefinition(TableInfo tableInfo) {
+		Table table = tableInfo.getType().getAnnotation(Table.class);
+		String module = table.module();
+		if (TextUtils.isEmpty(module)) return "";
+
+		final ArrayList<String> definitions = new ArrayList<String>();
+		for (Field field : tableInfo.getFields()) {
+			String definition = tableInfo.getColumnName(field);
+			if (!TextUtils.isEmpty(definition)) {
+				definitions.add(definition);
+			}
+		}
+
+		definitions.addAll(createUniqueDefinition(tableInfo));
+
+		return String.format("CREATE VIRTUAL TABLE IF NOT EXISTS %s USING %s(%s);", tableInfo.getTableName(),
+				module, TextUtils.join(", ", definitions));
 	}
 
 	@SuppressWarnings("unchecked")

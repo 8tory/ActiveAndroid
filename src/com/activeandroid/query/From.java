@@ -40,6 +40,7 @@ public final class From implements Sqlable {
 	private List<Join> mJoins;
 	private String mFrom;
 	private String mWhere;
+	private String mMatch;
 	private String mGroupBy;
 	private String mHaving;
 	private String mOrderBy;
@@ -134,6 +135,23 @@ public final class From implements Sqlable {
 		return this;
 	}
 
+	public From match(String match, Object... args) {
+		return match(match, Arrays.asList(args));
+	}
+
+	public From match(String match, String[] args) {
+		//return match(match, Arrays.asList(args));
+		return match(match, (Object[]) args);
+	}
+
+	public From match(String match, List<Object> args) {
+		mMatch = match;
+		mArguments.clear();
+		mArguments.addAll(args);
+
+		return this;
+	}
+
 	public From groupBy(String groupBy) {
 		mGroupBy = groupBy;
 		return this;
@@ -204,6 +222,12 @@ public final class From implements Sqlable {
 		if (mWhere != null) {
 			sql.append("WHERE ");
 			sql.append(mWhere);
+			sql.append(" ");
+		}
+
+		if (mMatch != null) {
+			sql.append("MATCH ");
+			sql.append(mMatch);
 			sql.append(" ");
 		}
 

@@ -25,4 +25,11 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Table {
 	public String name();
+
+	public static class Module {
+		public static final String FTS4 = "FTS4";
+		public static final String FTS3 = "FTS3";
+	}
+
+	public String module() default "";
 }
