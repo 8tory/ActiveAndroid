@@ -35,6 +35,7 @@ public final class TableInfo {
 
 	private Class<? extends Model> mType;
 	private String mTableName;
+	private String mSchema;
 
 	private Map<Field, String> mColumnNames = new HashMap<Field, String>();
 	private Map<String, Column> mColumns = new HashMap<String, Column>();
@@ -77,6 +78,14 @@ public final class TableInfo {
 				mReadOnlyColumns.put(fieldName, columnAnnotation.readOnly());
 			}
 		}
+	}
+
+	public String getSchema() {
+		return mSchema;
+	}
+
+	public void setSchema(String schema) {
+		mSchema = schema;
 	}
 
 	//////////////////////////////////////////////////////////////////////////////////////

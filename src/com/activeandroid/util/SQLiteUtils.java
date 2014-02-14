@@ -278,6 +278,50 @@ public final class SQLiteUtils {
 		return definitions.toArray(new String[definitions.size()]);
 	}
 
+	public static String getSchema(TableInfo tableInfo) {
+		return getSchema(tableInfo.getTableName());
+	}
+
+	public static String getSchema(String table) {
+		Cursor cursor = Cache.openDatabase().rawQuery(
+				"SELECT sql FROM sqlite_master WHERE type='" + table + "'", null);
+		String schema = null;
+		try {
+			if (cursor.moveToFirst()) {
+				schema = cursor.getString(cursor.getColumnIndex("sql"));
+			}
+		} finally {
+			cursor.close();
+		}
+		return schema;
+	}
+
+	public static List<String> getColumns(TableInfo tableInfo) {
+		return getColumns(getSchema(tableInfo));
+	}
+
+	// TODO
+	public static List<String> getColumns(String schema) {
+		return null;
+	}
+
+	// TODO
+	public static List<String> alterColumns(String table, String... columns) {
+		return null;
+	}
+
+	// TODO
+	public static List<String> renameColumn(String table, String from, String to) {
+		return null;
+	}
+
+	/**
+	 * rename(Model, Model)
+	 */
+	public static List<String> renameTable(String from, String to) {
+		return null;
+	}
+
 	public static void createIndexColumnDefinition(TableInfo tableInfo, Field field) {
 		final String name = tableInfo.getColumnName(field);
 		final Column column = field.getAnnotation(Column.class);

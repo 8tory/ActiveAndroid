@@ -65,7 +65,7 @@ public final class DatabaseHelper extends SQLiteOpenHelper {
 		executePragmas(db);
 		executeCreate(db);
 		executeMigrations(db, -1, db.getVersion());
-		executeCreate(db);
+		executeCreate(db); // Maybe droped tables after mirgation
 		executeCreateIndex(db);
 	}
 
@@ -149,7 +149,15 @@ public final class DatabaseHelper extends SQLiteOpenHelper {
 		db.beginTransaction();
 		try {
 			for (TableInfo tableInfo : Cache.getTableInfos()) {
-				db.execSQL(SQLiteUtils.createTableDefinition(tableInfo));
+				String toSql = SQLiteUtils.createTableDefinition(tableInfo);
+				tableInfo.setSchema(toSql);
+				alterColumnsIfNeed(tableInfo);
+				/*
+				 * TODO
+				 * alter if need
+				String schemaFrom = SQLiteUtils.getSchema(tableInfo);
+				*/
+				db.execSQL(toSql);
 			}
 			db.setTransactionSuccessful();
 		}
@@ -170,6 +178,64 @@ public final class DatabaseHelper extends SQLiteOpenHelper {
 			db.endTransaction();
 		}
 	}
+
+	/**
+	 * TODO
+	 */
+	private boolean alterColumnsIfNeed(TableInfo tableInfo) {
+		return false;
+	}
+
+	/**
+	 * TODO
+	 */
+	private boolean alterColumnsIfNeed(String table, String toSql, String fromSql) {
+		//List<String> toColumns = getColumns(toSql);
+		//List<String> fromColumns = getColumns(fromSql);
+		return false;
+	}
+
+	/*
+	private boolean addColumnsIfNeed(String table, String to, String from) {
+		try {
+			// if change name of column or add new column, or delete
+			boolean isAddNewColumn = false;
+
+			if (from.contains(table)) {
+				List<String> fromColumns = Arrays.asList(from.
+						replace(String.format(
+								SimpleConstants.SQL_CREATE_TABLE, table), SimpleConstants.EMPTY).
+						replace(SimpleConstants.LAST_BRACKET, SimpleConstants.EMPTY).
+						split(SimpleConstants.DIVIDER_WITH_SPACE));
+
+				List<String> toColumns = Arrays.asList(to.
+						replace(String.format(
+								SimpleConstants.SQL_CREATE_TABLE_IF_NOT_EXIST, table), SimpleConstants.EMPTY).
+						replace(SimpleConstants.LAST_BRACKET, SimpleConstants.EMPTY).
+						split(SimpleConstants.DIVIDER_WITH_SPACE));
+
+				List<String> extraColumns = new ArrayList<String>(toColumns);
+				extraColumns.removeAll(fromColumns);
+
+				if (extraColumns.size() > 0) {
+
+					SQLiteDatabase database = sqLiteSimpleHelper.getWritableDatabase();
+					for (String column : extraColumns) {
+						database.execSQL(String.format(
+									SimpleConstants.SQL_ALTER_TABLE_ADD_COLUMN, table, column));
+					}
+					database.close();
+					isAddNewColumn = true;
+				}
+			}
+
+			return isAddNewColumn;
+
+		} catch (IndexOutOfBoundsException exception) {
+			throw new RuntimeException("Duplicated class on method create(...)");
+		}
+	}
+	*/
 
 	private boolean executeMigrations(SQLiteDatabase db, int oldVersion, int newVersion) {
 		boolean migrationExecuted = false;
