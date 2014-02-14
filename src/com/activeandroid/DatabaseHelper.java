@@ -30,6 +30,8 @@ import java.util.List;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.database.sqlite.SQLiteStatement;
+import android.os.Build;
 
 import com.activeandroid.util.Log;
 import com.activeandroid.util.NaturalOrderComparator;
@@ -173,6 +175,9 @@ public final class DatabaseHelper extends SQLiteOpenHelper {
 		db.beginTransaction();
 		try {
 			for (TableInfo tableInfo : Cache.getTableInfos()) {
+				if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.FROYO) {
+					if (existVirtualTable(db, tableInfo)) continue;
+				}
 				String toSql = SQLiteUtils.createVirtualTableDefinition(tableInfo);
 				if (android.text.TextUtils.isEmpty(toSql)) continue;
 				db.execSQL(toSql);
@@ -182,6 +187,19 @@ public final class DatabaseHelper extends SQLiteOpenHelper {
 		finally {
 			db.endTransaction();
 		}
+	}
+
+	private boolean existVirtualTable(SQLiteDatabase db, TableInfo tableInfo) {
+		String tableName = tableInfo.getTableName();
+		SQLiteStatement statement = db.compileStatement(
+					"SELECT DISTINCT tbl_name from sqlite_master where tbl_name = '" + tableName + "'");
+		String result = statement.simpleQueryForString();
+		if (!tableName.equals(result)) {
+			statement = db.compileStatement(
+					"SELECT DISTINCT tablename from sqlite_master where tablename = '" + tableName + "'");
+			result = statement.simpleQueryForString();
+		}
+		return tableName.equals(result);
 	}
 
 	private void executeDrop(SQLiteDatabase db) {

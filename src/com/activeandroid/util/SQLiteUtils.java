@@ -431,8 +431,13 @@ public final class SQLiteUtils {
 
 		definitions.addAll(createUniqueDefinition(tableInfo));
 
-		return String.format("CREATE VIRTUAL TABLE IF NOT EXISTS %s USING %s(%s);", tableInfo.getTableName(),
-				tableInfo.getModule(), TextUtils.join(", ", definitions));
+		if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.FROYO) {
+			return String.format("CREATE VIRTUAL TABLE %s USING %s(%s);", tableInfo.getTableName(),
+					tableInfo.getModule(), TextUtils.join(", ", definitions));
+		} else {
+			return String.format("CREATE VIRTUAL TABLE IF NOT EXISTS %s USING %s(%s);", tableInfo.getTableName(),
+					tableInfo.getModule(), TextUtils.join(", ", definitions));
+		}
 	}
 
 	@SuppressWarnings("unchecked")
