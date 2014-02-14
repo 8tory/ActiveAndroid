@@ -67,6 +67,7 @@ public final class DatabaseHelper extends SQLiteOpenHelper {
 		executeMigrations(db, -1, db.getVersion());
 		executeCreate(db); // Maybe droped tables after mirgation
 		executeCreateIndex(db);
+		executeCreateVirtualTable(db);
 	}
 
 	@Override
@@ -76,6 +77,7 @@ public final class DatabaseHelper extends SQLiteOpenHelper {
 		executeMigrations(db, oldVersion, newVersion);
 		executeCreate(db);
 		executeCreateIndex(db);
+		executeCreateVirtualTable(db);
 	}
 
 	//////////////////////////////////////////////////////////////////////////////////////
@@ -151,12 +153,28 @@ public final class DatabaseHelper extends SQLiteOpenHelper {
 			for (TableInfo tableInfo : Cache.getTableInfos()) {
 				String toSql = SQLiteUtils.createTableDefinition(tableInfo);
 				tableInfo.setSchema(toSql);
+				if (android.text.TextUtils.isEmpty(toSql)) continue;
 				alterColumnsIfNeed(tableInfo);
 				/*
 				 * TODO
 				 * alter if need
 				String schemaFrom = SQLiteUtils.getSchema(tableInfo);
 				*/
+				db.execSQL(toSql);
+			}
+			db.setTransactionSuccessful();
+		}
+		finally {
+			db.endTransaction();
+		}
+	}
+
+	private void executeCreateVirtualTable(SQLiteDatabase db) {
+		db.beginTransaction();
+		try {
+			for (TableInfo tableInfo : Cache.getTableInfos()) {
+				String toSql = SQLiteUtils.createVirtualTableDefinition(tableInfo);
+				if (android.text.TextUtils.isEmpty(toSql)) continue;
 				db.execSQL(toSql);
 			}
 			db.setTransactionSuccessful();

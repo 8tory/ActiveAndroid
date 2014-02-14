@@ -401,6 +401,8 @@ public final class SQLiteUtils {
 	}
 
 	public static String createTableDefinition(TableInfo tableInfo) {
+		if (!TextUtils.isEmpty(tableInfo.getModule())) return null;
+
 		final ArrayList<String> definitions = new ArrayList<String>();
 
 		for (Field field : tableInfo.getFields()) {
@@ -417,9 +419,7 @@ public final class SQLiteUtils {
 	}
 
 	public static String createVirtualTableDefinition(TableInfo tableInfo) {
-		Table table = tableInfo.getType().getAnnotation(Table.class);
-		String module = table.module();
-		if (TextUtils.isEmpty(module)) return "";
+		if (TextUtils.isEmpty(tableInfo.getModule())) return null;
 
 		final ArrayList<String> definitions = new ArrayList<String>();
 		for (Field field : tableInfo.getFields()) {
@@ -432,7 +432,7 @@ public final class SQLiteUtils {
 		definitions.addAll(createUniqueDefinition(tableInfo));
 
 		return String.format("CREATE VIRTUAL TABLE IF NOT EXISTS %s USING %s(%s);", tableInfo.getTableName(),
-				module, TextUtils.join(", ", definitions));
+				tableInfo.getModule(), TextUtils.join(", ", definitions));
 	}
 
 	@SuppressWarnings("unchecked")

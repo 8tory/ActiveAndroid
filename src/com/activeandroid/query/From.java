@@ -108,7 +108,11 @@ public final class From implements Sqlable {
 	}
 
 	public From where() {
-		return where(null);
+		return where((String) null);
+	}
+
+	public From where(Class<? extends Model> table) {
+		return where(Cache.getTableName(table));
 	}
 
 	public From where(String where) {

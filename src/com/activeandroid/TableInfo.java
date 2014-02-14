@@ -35,6 +35,7 @@ public final class TableInfo {
 
 	private Class<? extends Model> mType;
 	private String mTableName;
+	private String mModule;
 	private String mSchema;
 
 	private Map<Field, String> mColumnNames = new HashMap<Field, String>();
@@ -51,6 +52,7 @@ public final class TableInfo {
 		final Table tableAnnotation = type.getAnnotation(Table.class);
 		if (tableAnnotation != null) {
 			mTableName = tableAnnotation.name();
+			mModule = tableAnnotation.module();
 		}
 		else {
 			mTableName = type.getSimpleName();
@@ -98,6 +100,10 @@ public final class TableInfo {
 
 	public String getTableName() {
 		return mTableName;
+	}
+
+	public String getModule() {
+		return mModule;
 	}
 
 	public Collection<Field> getFields() {
