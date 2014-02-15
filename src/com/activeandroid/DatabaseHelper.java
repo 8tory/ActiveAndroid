@@ -177,7 +177,7 @@ public final class DatabaseHelper extends SQLiteOpenHelper {
 		try {
 			for (TableInfo tableInfo : Cache.getTableInfos()) {
 				if (Build.VERSION.SDK_INT <= 10) {
-					if (existVirtualTable(db, tableInfo)) continue;
+					if (existsTable(db, tableInfo)) continue;
 				}
 				String toSql = SQLiteUtils.createVirtualTableDefinition(tableInfo);
 				if (android.text.TextUtils.isEmpty(toSql)) continue;
@@ -190,7 +190,7 @@ public final class DatabaseHelper extends SQLiteOpenHelper {
 		}
 	}
 
-	private boolean existVirtualTable(SQLiteDatabase db, TableInfo tableInfo) {
+	private boolean existsTable(SQLiteDatabase db, TableInfo tableInfo) {
 		String tableName = tableInfo.getTableName();
 		SQLiteStatement statement = db.compileStatement(
 					"SELECT DISTINCT tbl_name from sqlite_master where tbl_name = '" + tableName + "'");
