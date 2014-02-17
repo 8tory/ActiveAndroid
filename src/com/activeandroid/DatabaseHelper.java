@@ -176,6 +176,9 @@ public final class DatabaseHelper extends SQLiteOpenHelper {
 		db.beginTransaction();
 		try {
 			for (TableInfo tableInfo : Cache.getTableInfos()) {
+				if (Build.VERSION.SDK_INT <= 10) {
+					if (existsTable(db, tableInfo)) continue;
+				}
 				String toSql = SQLiteUtils.createVirtualTableDefinition(tableInfo);
 				if (android.text.TextUtils.isEmpty(toSql)) continue;
 				db.execSQL(toSql);
