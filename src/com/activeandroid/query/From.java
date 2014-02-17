@@ -296,8 +296,16 @@ public final class From implements Sqlable {
 				CursorList<T> entities = com.activeandroid.util.SQLiteUtils.processCursor(mType, c);
 				return entities;
 			}
-		}
-		else {
+		} else if (mQueryBase instanceof Delete) {
+			if (!ActiveAndroid.inContentProvider()) {
+				SQLiteUtils.execSql(toSql(), getArguments());
+				Cache.getContext().getContentResolver().notifyChange(
+						ContentProvider.createUri(mType, null), null);
+			} else {
+				Cache.getContext().getContentResolver().delete(ContentProvider.createUri(mType, null), mWhere, getArguments());
+			}
+			return null;
+		} else {
 			if (!ActiveAndroid.inContentProvider()) SQLiteUtils.execSql(toSql(), getArguments());
 			else Cache.getContext().getContentResolver().delete(ContentProvider.createUri(mType, null), mWhere, getArguments());
 			return null;
