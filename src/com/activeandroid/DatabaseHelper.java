@@ -61,6 +61,7 @@ public final class DatabaseHelper extends SQLiteOpenHelper {
 	@Override
 	public void onOpen(SQLiteDatabase db) {
 		executePragmas(db);
+		//executeAlter(db);
 	};
 
 	@Override
@@ -71,6 +72,7 @@ public final class DatabaseHelper extends SQLiteOpenHelper {
 		executeCreate(db); // Maybe droped tables after mirgation
 		executeCreateIndex(db);
 		executeCreateVirtualTable(db);
+		//executeAlter(db);
 	}
 
 	@Override
@@ -81,6 +83,7 @@ public final class DatabaseHelper extends SQLiteOpenHelper {
 		executeCreate(db);
 		executeCreateIndex(db);
 		executeCreateVirtualTable(db);
+		//executeAlter(db);
 	}
 
 	//////////////////////////////////////////////////////////////////////////////////////
@@ -154,16 +157,10 @@ public final class DatabaseHelper extends SQLiteOpenHelper {
 		db.beginTransaction();
 		try {
 			for (TableInfo tableInfo : Cache.getTableInfos()) {
-				String toSql = SQLiteUtils.createTableDefinition(tableInfo);
-				tableInfo.setSchema(toSql);
-				if (android.text.TextUtils.isEmpty(toSql)) continue;
-				alterColumnsIfNeed(tableInfo);
-				/*
-				 * TODO
-				 * alter if need
-				String schemaFrom = SQLiteUtils.getSchema(tableInfo);
-				*/
-				db.execSQL(toSql);
+				String sql = SQLiteUtils.createTableDefinition(tableInfo);
+				if (android.text.TextUtils.isEmpty(sql)) continue;
+				tableInfo.setSchema(sql);
+				db.execSQL(sql);
 			}
 			db.setTransactionSuccessful();
 		}
@@ -179,9 +176,39 @@ public final class DatabaseHelper extends SQLiteOpenHelper {
 				if (Build.VERSION.SDK_INT <= 10) {
 					if (existsTable(db, tableInfo)) continue;
 				}
-				String toSql = SQLiteUtils.createVirtualTableDefinition(tableInfo);
-				if (android.text.TextUtils.isEmpty(toSql)) continue;
-				db.execSQL(toSql);
+                                // if (existsTable(db, tableInfo)) SQLiteUtils.drop(tableInfo);
+				String sql = SQLiteUtils.createVirtualTableDefinition(tableInfo);
+				if (android.text.TextUtils.isEmpty(sql)) continue;
+				tableInfo.setSchema(sql);
+				db.execSQL(sql);
+			}
+			db.setTransactionSuccessful();
+		}
+		finally {
+			db.endTransaction();
+		}
+	}
+
+	/**
+	 * After {@link TableInfo#setSchema} with {@link #executeCreate} and {@link #executeCreateVirtualTable}
+	 */
+	private void executeAlter(SQLiteDatabase db) {
+		db.beginTransaction();
+		try {
+			for (TableInfo tableInfo : Cache.getTableInfos()) {
+				if (android.text.TextUtils.isEmpty(tableInfo.getSchema())) {
+					String schema = SQLiteUtils.createTableDefinition(tableInfo);
+					if (android.text.TextUtils.isEmpty(schema)) {
+						schema = SQLiteUtils.createVirtualTableDefinition(tableInfo);
+					}
+					if (android.text.TextUtils.isEmpty(schema)) continue;
+					tableInfo.setSchema(schema);
+				}
+				if (android.text.TextUtils.isEmpty(tableInfo.getSchema())) continue;
+				String sql = SQLiteUtils.createAlterDefinition(db, tableInfo);
+				if (android.text.TextUtils.isEmpty(sql)) continue;
+				Log.d("alterSql: " + sql);
+				db.execSQL(sql);
 			}
 			db.setTransactionSuccessful();
 		}
@@ -215,64 +242,6 @@ public final class DatabaseHelper extends SQLiteOpenHelper {
 			db.endTransaction();
 		}
 	}
-
-	/**
-	 * TODO
-	 */
-	private boolean alterColumnsIfNeed(TableInfo tableInfo) {
-		return false;
-	}
-
-	/**
-	 * TODO
-	 */
-	private boolean alterColumnsIfNeed(String table, String toSql, String fromSql) {
-		//List<String> toColumns = getColumns(toSql);
-		//List<String> fromColumns = getColumns(fromSql);
-		return false;
-	}
-
-	/*
-	private boolean addColumnsIfNeed(String table, String to, String from) {
-		try {
-			// if change name of column or add new column, or delete
-			boolean isAddNewColumn = false;
-
-			if (from.contains(table)) {
-				List<String> fromColumns = Arrays.asList(from.
-						replace(String.format(
-								SimpleConstants.SQL_CREATE_TABLE, table), SimpleConstants.EMPTY).
-						replace(SimpleConstants.LAST_BRACKET, SimpleConstants.EMPTY).
-						split(SimpleConstants.DIVIDER_WITH_SPACE));
-
-				List<String> toColumns = Arrays.asList(to.
-						replace(String.format(
-								SimpleConstants.SQL_CREATE_TABLE_IF_NOT_EXIST, table), SimpleConstants.EMPTY).
-						replace(SimpleConstants.LAST_BRACKET, SimpleConstants.EMPTY).
-						split(SimpleConstants.DIVIDER_WITH_SPACE));
-
-				List<String> extraColumns = new ArrayList<String>(toColumns);
-				extraColumns.removeAll(fromColumns);
-
-				if (extraColumns.size() > 0) {
-
-					SQLiteDatabase database = sqLiteSimpleHelper.getWritableDatabase();
-					for (String column : extraColumns) {
-						database.execSQL(String.format(
-									SimpleConstants.SQL_ALTER_TABLE_ADD_COLUMN, table, column));
-					}
-					database.close();
-					isAddNewColumn = true;
-				}
-			}
-
-			return isAddNewColumn;
-
-		} catch (IndexOutOfBoundsException exception) {
-			throw new RuntimeException("Duplicated class on method create(...)");
-		}
-	}
-	*/
 
 	private boolean executeMigrations(SQLiteDatabase db, int oldVersion, int newVersion) {
 		boolean migrationExecuted = false;

@@ -19,6 +19,7 @@ package com.activeandroid.util;
 import android.annotation.SuppressLint;
 import android.content.ContentValues;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Build;
 import android.os.Looper;
 import android.text.TextUtils;
@@ -31,12 +32,14 @@ import com.activeandroid.annotation.Column;
 import com.activeandroid.annotation.Column.ConflictAction;
 import com.activeandroid.annotation.Table;
 import com.activeandroid.serializer.TypeSerializer;
+import com.activeandroid.util.Log;
 import com.novoda.notils.cursor.CursorList;
 import com.novoda.notils.cursor.SimpleCursorList;
 import com.novoda.notils.cursor.SmartCursorWrapper;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -146,7 +149,11 @@ public final class SQLiteUtils {
 	}
 
 	public static void drop(Class<? extends Model> type) {
-		execSql("DROP TABLE IF EXISTS " + Cache.getTableInfo(type).getTableName());
+		drop(Cache.getTableInfo(type));
+	}
+
+	public static void drop(TableInfo tableInfo) {
+		execSql("DROP TABLE IF EXISTS " + tableInfo.getTableName());
 	}
 
 	public static <T extends Model> CursorList<T> rawQuery(Class<? extends Model> type, String sql, String[] selectionArgs) {
@@ -279,13 +286,13 @@ public final class SQLiteUtils {
 		return definitions.toArray(new String[definitions.size()]);
 	}
 
-	public static String getSchema(TableInfo tableInfo) {
-		return getSchema(tableInfo.getTableName());
+	public static String getSchema(SQLiteDatabase db, TableInfo tableInfo) {
+		return getSchema(db, tableInfo.getTableName());
 	}
 
-	public static String getSchema(String table) {
-		Cursor cursor = Cache.openDatabase().rawQuery(
-				"SELECT sql FROM sqlite_master WHERE type='" + table + "'", null);
+	public static String getSchema(SQLiteDatabase db, String tableName) {
+		Cursor cursor = db.rawQuery(
+				"SELECT sql FROM sqlite_master WHERE type='table' and name='" + tableName + "'", null);
 		String schema = null;
 		try {
 			if (cursor.moveToFirst()) {
@@ -297,13 +304,101 @@ public final class SQLiteUtils {
 		return schema;
 	}
 
-	public static List<String> getColumns(TableInfo tableInfo) {
-		return getColumns(getSchema(tableInfo));
+	/**
+	 * TODO
+	 */
+	public static String createAlterDefinition(SQLiteDatabase db, TableInfo tableInfo) {
+		String fromSql = getSchema(db, tableInfo);
+		Log.d("name: " + tableInfo.getTableName());
+		if (TextUtils.isEmpty(fromSql)) return null;
+		Log.d("fromSql: " + fromSql);
+		String toSql = tableInfo.getSchema();
+		if (TextUtils.isEmpty(toSql)) return null;
+		Log.d("toSql: " + toSql);
+		List<String> fromColumns = getColumns(tableInfo, fromSql);
+		if (fromColumns == null || fromColumns.isEmpty()) return null;
+		List<String> toColumns = getColumns(tableInfo, toSql);
+		if (fromColumns == null || fromColumns.isEmpty()) return null;
+		Log.d("toCols: " + java.util.Arrays.deepToString(toColumns.toArray()));
+		Log.d("fromCols: " + java.util.Arrays.deepToString(fromColumns.toArray()));
+		List<String> extraColumns = new ArrayList<String>(toColumns);
+		extraColumns.removeAll(fromColumns);
+		Log.d("extCols: " + java.util.Arrays.deepToString(extraColumns.toArray()));
+		StringBuilder sql = new StringBuilder();
+		for (String column : extraColumns) {
+			sql.append(String.format("ALTER TABLE %s ADD COLUMN %s; ", tableInfo.getTableName(), column));
+		}
+		return sql.toString();
+	}
+
+	/**
+	 * TODO
+	 */
+	private boolean alterColumnsIfNeed(String table, String toSql, String fromSql) {
+		//List<String> toColumns = getColumns(toSql);
+		//List<String> fromColumns = getColumns(fromSql);
+		return false;
+	}
+
+	/*
+	private boolean addColumnsIfNeed(String table, String to, String from) {
+		try {
+			// if change name of column or add new column, or delete
+			boolean isAddNewColumn = false;
+
+			if (from.contains(table)) {
+				List<String> fromColumns = Arrays.asList(from.
+						replace(String.format(
+								SimpleConstants.SQL_CREATE_TABLE, table), SimpleConstants.EMPTY).
+						replace(SimpleConstants.LAST_BRACKET, SimpleConstants.EMPTY).
+						split(SimpleConstants.DIVIDER_WITH_SPACE));
+
+				List<String> toColumns = Arrays.asList(to.
+						replace(String.format(
+								SimpleConstants.SQL_CREATE_TABLE_IF_NOT_EXIST, table), SimpleConstants.EMPTY).
+						replace(SimpleConstants.LAST_BRACKET, SimpleConstants.EMPTY).
+						split(SimpleConstants.DIVIDER_WITH_SPACE));
+
+				List<String> extraColumns = new ArrayList<String>(toColumns);
+				extraColumns.removeAll(fromColumns);
+
+				if (extraColumns.size() > 0) {
+
+					SQLiteDatabase database = sqLiteSimpleHelper.getWritableDatabase();
+					for (String column : extraColumns) {
+						database.execSQL(String.format(
+									SimpleConstants.SQL_ALTER_TABLE_ADD_COLUMN, table, column));
+					}
+					database.close();
+					isAddNewColumn = true;
+				}
+			}
+
+			return isAddNewColumn;
+
+		} catch (IndexOutOfBoundsException exception) {
+			throw new RuntimeException("Duplicated class on method create(...)");
+		}
+	}
+	*/
+
+	public static List<String> getColumns(TableInfo tableInfo, String schema) {
+		return getColumns(tableInfo.getTableName(), schema);
 	}
 
 	// TODO
-	public static List<String> getColumns(String schema) {
-		return null;
+	public static List<String> getColumns(String tableName, String schema) {
+		List<String> columns = Arrays.asList(schema
+				.replaceAll("CREATE (VIRTUAL )?TABLE (IF NOT EXISTS )?" + tableName, "")
+				.replace("(", "")
+				.replace(")", "")
+				.replace(";", "")
+				.split(","));
+		List<String> columnsWithoutType = new ArrayList<String>();
+		for (String column : columns) {
+			columnsWithoutType.add(column.replaceAll("^\\s+", "").replaceAll(" .*", ""));
+		}
+		return columnsWithoutType;
 	}
 
 	// TODO
