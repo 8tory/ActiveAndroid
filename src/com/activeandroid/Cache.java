@@ -305,9 +305,9 @@ public final class Cache {
 				} catch (Exception e) {
 				}
 			}
-
-			db.beginTransaction();
 		}
+
+		db.beginTransaction();
 	}
 
 	private static boolean needYieldTransaction() {
