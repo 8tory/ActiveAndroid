@@ -89,6 +89,10 @@ public abstract class Model {
 		mReplace = replace;
 	}
 
+	public final boolean isEnabled() {
+		return enable;
+	}
+
 	public final void setEnabled(boolean enable) {
 		this.enable = enable;
 	}
