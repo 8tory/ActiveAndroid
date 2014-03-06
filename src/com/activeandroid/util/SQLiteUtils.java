@@ -30,7 +30,6 @@ import com.activeandroid.Model;
 import com.activeandroid.TableInfo;
 import com.activeandroid.annotation.Column;
 import com.activeandroid.annotation.Column.ConflictAction;
-import com.activeandroid.annotation.Table;
 import com.activeandroid.serializer.TypeSerializer;
 import com.activeandroid.util.Log;
 import com.novoda.notils.cursor.CursorList;
@@ -265,27 +264,6 @@ public final class SQLiteUtils {
 
 	// Database creation
 
-	public static String[] createIndexDefinition(TableInfo tableInfo) {
-		final ArrayList<String> definitions = new ArrayList<String>();
-		sIndexGroupMap = new HashMap<String, List<String>>();
-
-		for (Field field : tableInfo.getFields()) {
-			createIndexColumnDefinition(tableInfo, field);
-		}
-
-		if (sIndexGroupMap.isEmpty()) {
-			return new String[0];
-		}
-
-		for (Map.Entry<String, List<String>> entry : sIndexGroupMap.entrySet()) {
-			definitions.add(String.format("CREATE INDEX IF NOT EXISTS %s on %s(%s);",
-					"index_" + tableInfo.getTableName() + "_" + entry.getKey(),
-					tableInfo.getTableName(), TextUtils.join(", ", entry.getValue())));
-		}
-
-		return definitions.toArray(new String[definitions.size()]);
-	}
-
 	public static String getSchema(SQLiteDatabase db, TableInfo tableInfo) {
 		return getSchema(db, tableInfo.getTableName());
 	}
@@ -418,31 +396,6 @@ public final class SQLiteUtils {
 		return null;
 	}
 
-	public static void createIndexColumnDefinition(TableInfo tableInfo, Field field) {
-		final String name = tableInfo.getColumnName(field);
-		final Column column = field.getAnnotation(Column.class);
-
-		if (column.index()) {
-			List<String> list = new ArrayList<String>();
-			list.add(name);
-			sIndexGroupMap.put(name, list);
-		}
-
-		String[] groups = column.indexGroups();
-		for (String group : groups) {
-			if (group.isEmpty())
-				continue;
-
-			List<String> list = sIndexGroupMap.get(group);
-			if (list == null) {
-				list = new ArrayList<String>();
-			}
-
-			list.add(name);
-			sIndexGroupMap.put(group, list);
-		}
-	}
-
 	public static ArrayList<String> createUniqueDefinition(TableInfo tableInfo) {
 		final ArrayList<String> definitions = new ArrayList<String>();
 		sUniqueGroupMap = new HashMap<String, List<String>>();
@@ -492,6 +445,52 @@ public final class SQLiteUtils {
 
 			sUniqueGroupMap.put(group, list);
 			sOnUniqueConflictsMap.put(group, conflictAction);
+		}
+	}
+
+	public static String[] createIndexDefinition(TableInfo tableInfo) {
+		final ArrayList<String> definitions = new ArrayList<String>();
+		sIndexGroupMap = new HashMap<String, List<String>>();
+
+		for (Field field : tableInfo.getFields()) {
+			createIndexColumnDefinition(tableInfo, field);
+		}
+
+		if (sIndexGroupMap.isEmpty()) {
+			return new String[0];
+		}
+
+		for (Map.Entry<String, List<String>> entry : sIndexGroupMap.entrySet()) {
+			definitions.add(String.format("CREATE INDEX IF NOT EXISTS %s on %s(%s);",
+					"index_" + tableInfo.getTableName() + "_" + entry.getKey(),
+					tableInfo.getTableName(), TextUtils.join(", ", entry.getValue())));
+		}
+
+		return definitions.toArray(new String[definitions.size()]);
+	}
+
+	public static void createIndexColumnDefinition(TableInfo tableInfo, Field field) {
+		final String name = tableInfo.getColumnName(field);
+		final Column column = field.getAnnotation(Column.class);
+
+		if (column.index()) {
+			List<String> list = new ArrayList<String>();
+			list.add(name);
+			sIndexGroupMap.put(name, list);
+		}
+
+		String[] groups = column.indexGroups();
+		for (String group : groups) {
+			if (group.isEmpty())
+				continue;
+
+			List<String> list = sIndexGroupMap.get(group);
+			if (list == null) {
+				list = new ArrayList<String>();
+			}
+
+			list.add(name);
+			sIndexGroupMap.put(group, list);
 		}
 	}
 

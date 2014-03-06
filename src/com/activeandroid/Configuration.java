@@ -273,11 +273,9 @@ public class Configuration {
 			final List<Class<? extends Model>> modelClasses = new ArrayList<Class<? extends Model>>();
 			final ClassLoader classLoader = mContext.getClass().getClassLoader();
 			for (String model : models) {
-				model = ensurePackageInName(model);
-
 				try {
 					@SuppressWarnings("unchecked")
-					Class<? extends Model> modelClass = (Class<? extends Model>) Class.forName(model, false, classLoader);
+					Class<? extends Model> modelClass = (Class<? extends Model>) Class.forName(model.trim(), false, classLoader);
 					if (ReflectionUtils.isModel(modelClass)) {
 						modelClasses.add(modelClass);
 					}
@@ -294,11 +292,9 @@ public class Configuration {
 			final List<Class<? extends TypeSerializer>> typeSerializers = new ArrayList<Class<? extends TypeSerializer>>();
 			final ClassLoader classLoader = mContext.getClass().getClassLoader();
 			for (String serializer : serializers) {
-				serializer = ensurePackageInName(serializer);
-
 				try {
 					@SuppressWarnings("unchecked")
-					Class<? extends TypeSerializer> serializerClass = (Class<? extends TypeSerializer>) Class.forName(serializer, false, classLoader);
+					Class<? extends TypeSerializer> serializerClass = (Class<? extends TypeSerializer>) Class.forName(serializer.trim(), false, classLoader);
 					if (ReflectionUtils.isTypeSerializer(serializerClass)) {
 						typeSerializers.add(serializerClass);
 					}
@@ -311,13 +307,5 @@ public class Configuration {
 			return typeSerializers;
 		}
 
-		private String ensurePackageInName(String name) {
-			String packageName = mContext.getPackageName();
-			if (name.startsWith(packageName)) {
-				return name.trim();
-			}
-
-			return packageName + name.trim();
-		}
 	}
 }

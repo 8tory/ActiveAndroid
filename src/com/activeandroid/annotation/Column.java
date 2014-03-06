@@ -89,7 +89,7 @@ public @interface Column {
 	public boolean index() default false;
 
 	/*
-	 * If set indexGroup = "group_name", we will create a index with group.
+	 * If set indexGroups = {"group_name"}, we will create a index with group.
 	 *
 	 * Example:
 	 *

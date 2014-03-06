@@ -31,7 +31,20 @@ public class ModelCursorMarshaller<T> implements CursorMarshaller<T> {
                 entity.loadFromCursor(cursor);
                 //android.util.Log.d("ModelCursorMarshaller", "" + entity);
             }
-        } catch (Exception e) {
+        }
+        /*
+		catch (NoSuchMethodException e) {
+			throw new RuntimeException(
+                "Your model " + type.getName() + " does not define a default " +
+                "constructor. The default constructor is required for " +
+                "now in ActiveAndroid models, as the process to " +
+                "populate the ORM model is : " +
+                "1. instantiate default model " +
+                "2. populate fields"
+            );
+        }
+        */
+        catch (Exception e) {
             Log.e("Failed to process cursor.", e);
             //android.util.Log.e("ModelCursorMarshaller", "" + e);
         }

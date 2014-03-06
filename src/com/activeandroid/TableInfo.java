@@ -17,15 +17,18 @@ package com.activeandroid;
  */
 
 import java.lang.reflect.Field;
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import android.text.TextUtils;
+
 import com.activeandroid.annotation.Column;
 import com.activeandroid.annotation.Table;
-import com.activeandroid.util.Log;
 import com.activeandroid.util.ReflectionUtils;
 
 public final class TableInfo {
@@ -38,7 +41,7 @@ public final class TableInfo {
 	private String mModule;
 	private String mSchema;
 
-	private Map<Field, String> mColumnNames = new HashMap<Field, String>();
+	private Map<Field, String> mColumnNames = new LinkedHashMap<Field, String>();
 	private Map<String, Column> mColumns = new HashMap<String, Column>();
 	private Map<String, Boolean> mReadOnlyColumns = new HashMap<String, Boolean>();
 
@@ -58,27 +61,19 @@ public final class TableInfo {
 			mTableName = type.getSimpleName();
 		}
 
-		List<Field> fields = new ArrayList<Field>();
-		try {
-			fields = ReflectionUtils.getAllFields(fields, Class.forName(type.getName()));
-			fields.add(getIdField(type));
-		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
-		}
-
+		List<Field> fields = new LinkedList<Field>(ReflectionUtils.getDeclaredColumnFields(type));
+		Collections.reverse(fields);
+		
 		for (Field field : fields) {
-			if (field.isAnnotationPresent(Column.class)) {
-				final Column columnAnnotation = field.getAnnotation(Column.class);
-				String fieldName;
-				if (!"".equals(columnAnnotation.name())) {
-					fieldName = columnAnnotation.name();
-				} else {
-					fieldName = field.getName();
-				}
-				mColumnNames.put(field, fieldName);
-				mColumns.put(fieldName, columnAnnotation);
-				mReadOnlyColumns.put(fieldName, columnAnnotation.readOnly());
+			final Column columnAnnotation = field.getAnnotation(Column.class);
+			String columnName = columnAnnotation.name();
+			if (TextUtils.isEmpty(columnName)) {
+				columnName = field.getName();
 			}
+			
+			mColumnNames.put(field, columnName);
+                        mColumns.put(columnName, columnAnnotation);
+                        mReadOnlyColumns.put(columnName, columnAnnotation.readOnly());
 		}
 	}
 
@@ -120,24 +115,5 @@ public final class TableInfo {
 
 	public boolean isReadOnlyColumn(String name) {
 		return mReadOnlyColumns.get(name);
-	}
-	//////////////////////////////////////////////////////////////////////////////////////
-	// PRIVATE METHODS
-	//////////////////////////////////////////////////////////////////////////////////////
-
-	private Field getIdField(Class<?> type) {
-		if (type.equals(Model.class)) {
-			try {
-				return type.getDeclaredField("mId");
-			}
-			catch (NoSuchFieldException e) {
-				Log.e("Impossible!", e);
-			}
-		}
-		else if (type.getSuperclass() != null) {
-			return getIdField(type.getSuperclass());
-		}
-
-		return null;
 	}
 }

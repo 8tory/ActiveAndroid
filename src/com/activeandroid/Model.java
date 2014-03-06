@@ -229,8 +229,8 @@ public abstract class Model {
 
 	// super me: super.save();
 	@SuppressLint("NewApi")
-	public void save() {
-		if (!enable) return;
+	public Long save() {
+		if (!enable) return mId;
 		final ContentValues values = toContentValues();
 
 		// TODO optimize the following code snippet
@@ -289,6 +289,7 @@ public abstract class Model {
 
 		Cache.getContext().getContentResolver()
 				.notifyChange(ContentProvider.createUri(mTableInfo.getType(), mId), null);
+		return mId;
 	}
 
 	// Convenience methods
