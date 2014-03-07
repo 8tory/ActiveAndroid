@@ -34,6 +34,7 @@ import com.activeandroid.serializer.TypeSerializer;
 import com.activeandroid.util.Log;
 import com.novoda.notils.cursor.CursorList;
 import com.novoda.notils.cursor.SimpleCursorList;
+import com.novoda.notils.cursor.SimpleCursorList.*;
 import com.novoda.notils.cursor.SmartCursorWrapper;
 
 import java.lang.reflect.Field;
@@ -616,7 +617,30 @@ public final class SQLiteUtils {
 				ActiveAndroid.endReleaseTransaction();
 			}
 		});
-		return new SimpleCursorList<T>(cursorWrapper, new ModelCursorMarshaller<T>(type));
+		SimpleCursorList<T> list = new SimpleCursorList<T>(cursorWrapper, new ModelCursorMarshaller<T>(type));
+		/*
+		list.setMarshallerListener(new MarshallerListener<T>() {
+			@Override
+			public boolean onMarshall() {
+				return false;
+			}
+			@Override
+			public boolean onMarshall(T entity) {
+				if (!entity.onMarshall(entity)) {
+					entity.onMarshall();
+				}
+				return false;
+			}
+		});
+		*/
+		list.setMarshallerListener(new SimpleMarshallerListener<T>() {
+			@Override
+			public boolean onMarshall(T entity) {
+				//entity.onMarshall();
+				return entity.onMarshall(entity);
+			}
+		});
+		return list;
 	}
 
 	public static void showException(boolean show) {

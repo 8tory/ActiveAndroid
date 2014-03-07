@@ -37,7 +37,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 
 @SuppressWarnings("unchecked")
-public abstract class Model {
+public abstract class Model <T extends Model<T>> implements com.novoda.notils.cursor.SimpleCursorList.MarshallerListener<T> {
 	public static final String FIELD_ID = "Id";
 	public static final String ID = FIELD_ID;
 
@@ -474,5 +474,15 @@ public abstract class Model {
 
 		return this.mId != null && (this.mTableInfo.getTableName().equals(other.mTableInfo.getTableName()))
 				&& (this.mId.equals(other.mId));
+	}
+
+	@Override
+	public boolean onMarshall() {
+		return false;
+	}
+
+	@Override
+	public boolean onMarshall(T entity) {
+		return false;
 	}
 }
