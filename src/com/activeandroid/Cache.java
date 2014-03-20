@@ -185,8 +185,10 @@ public final class Cache {
 	}
 
 	public static synchronized void addEntity(Model entity) {
+		synchronized (sEntities) {
 		if (sEntities == null) return;
 		sEntities.put(getIdentifier(entity), entity);
+		}
 	}
 
 	public static synchronized Model getEntity(Class<? extends Model> type, long id) {
@@ -195,9 +197,12 @@ public final class Cache {
 	}
 
 	public static synchronized void removeEntity(Model entity) {
+		synchronized (sEntities) {
 		if (sEntities == null) return;
 		sEntities.remove(getIdentifier(entity));
+		}
 	}
+
 
 	// Model cache
 
