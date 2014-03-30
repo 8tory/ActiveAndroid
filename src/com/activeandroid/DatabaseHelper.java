@@ -173,7 +173,7 @@ public final class DatabaseHelper extends SQLiteOpenHelper {
 		db.beginTransaction();
 		try {
 			for (TableInfo tableInfo : Cache.getTableInfos()) {
-				if (Build.VERSION.SDK_INT <= 10) {
+				if (Build.VERSION.SDK_INT < 16) {
 					if (existsTable(db, tableInfo)) continue;
 				}
                                 // if (existsTable(db, tableInfo)) SQLiteUtils.drop(tableInfo);
