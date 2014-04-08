@@ -89,6 +89,10 @@ public abstract class Model <T extends Model<T>> implements com.novoda.notils.cu
 		mReplace = replace;
 	}
 
+	public final boolean isEnabled() {
+		return enable;
+	}
+
 	public final void setEnabled(boolean enable) {
 		this.enable = enable;
 	}

@@ -292,11 +292,13 @@ public final class Cache {
 	}
 
 	public static void yieldTransaction() {
+		SQLiteDatabase db = null;
+
 		synchronized (yieldTransactionLock) {
 			if (!needYieldTransaction())
 				return;
 
-			final SQLiteDatabase db = sDatabaseHelper.getWritableDatabase();
+			db = sDatabaseHelper.getWritableDatabase();
 
 			try {
 				db.setTransactionSuccessful();
@@ -310,9 +312,9 @@ public final class Cache {
 				} catch (Exception e) {
 				}
 			}
-
-			db.beginTransaction();
 		}
+
+		db.beginTransaction();
 	}
 
 	private static boolean needYieldTransaction() {
