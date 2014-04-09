@@ -61,29 +61,28 @@ public final class DatabaseHelper extends SQLiteOpenHelper {
 	@Override
 	public void onOpen(SQLiteDatabase db) {
 		executePragmas(db);
-		//executeAlter(db);
-	};
-
-	@Override
-	public void onCreate(SQLiteDatabase db) {
-		executePragmas(db);
 		executeCreate(db);
-		executeMigrations(db, -1, db.getVersion());
-		executeCreate(db); // Maybe droped tables after mirgation
 		executeCreateIndex(db);
 		executeCreateVirtualTable(db);
 		//executeAlter(db);
 	}
 
 	@Override
-	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+	public void onCreate(SQLiteDatabase db) {
 		executePragmas(db);
-		executeCreate(db);
-		executeMigrations(db, oldVersion, newVersion);
 		executeCreate(db);
 		executeCreateIndex(db);
 		executeCreateVirtualTable(db);
-		//executeAlter(db);
+		executeMigrations(db, -1, db.getVersion());
+	}
+
+	@Override
+	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+		executePragmas(db);
+		executeCreate(db);
+		executeCreateIndex(db);
+		executeCreateVirtualTable(db);
+		executeMigrations(db, oldVersion, newVersion);
 	}
 
 	//////////////////////////////////////////////////////////////////////////////////////
