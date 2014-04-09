@@ -185,8 +185,8 @@ public final class Cache {
 	}
 
 	public static synchronized void addEntity(Model entity) {
-		synchronized (sEntities) {
 		if (sEntities == null) return;
+		synchronized (sEntities) {
 		sEntities.put(getIdentifier(entity), entity);
 		}
 	}
@@ -197,8 +197,8 @@ public final class Cache {
 	}
 
 	public static synchronized void removeEntity(Model entity) {
-		synchronized (sEntities) {
 		if (sEntities == null) return;
+		synchronized (sEntities) {
 		sEntities.remove(getIdentifier(entity));
 		}
 	}
