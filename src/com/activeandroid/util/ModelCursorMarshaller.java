@@ -28,8 +28,11 @@ public class ModelCursorMarshaller<T> implements CursorMarshaller<T> {
             if (entity == null) {
                 entity = type.newInstance();
                 //android.util.Log.d("ModelCursorMarshaller", "" + type);
-                entity.loadFromCursor(cursor);
+                int columnSize = entity.loadFromCursor(cursor);
                 //android.util.Log.d("ModelCursorMarshaller", "" + entity);
+                if (entity.getId() != null && columnSize == 0) {
+                    Cache.addEntity(entity);
+                }
             }
         }
         /*

@@ -347,7 +347,7 @@ public abstract class Model implements com.novoda.notils.cursor.SimpleCursorList
 
 	// Model population
 
-	public final void loadFromCursor(Cursor cursor) {
+	public final int loadFromCursor(Cursor cursor) {
 		int sizeOfColumnNotFound = 0;
 
 		for (Field field : mTableInfo.getFields()) {
@@ -444,9 +444,7 @@ public abstract class Model implements com.novoda.notils.cursor.SimpleCursorList
 			}
 		}
 
-		if (mId != null && sizeOfColumnNotFound == 0) {
-			Cache.addEntity(this);
-		}
+		return sizeOfColumnNotFound;
 	}
 
 	public static void registerContentObserver(Class<? extends Model> type, boolean notifyForDescendents, ContentObserver observer) {
