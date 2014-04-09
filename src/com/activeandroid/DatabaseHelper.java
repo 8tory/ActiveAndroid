@@ -33,6 +33,7 @@ import android.database.sqlite.SQLiteDoneException;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteStatement;
 import android.os.Build;
+import android.text.TextUtils;
 
 import com.activeandroid.util.Log;
 import com.activeandroid.util.NaturalOrderComparator;
@@ -64,7 +65,7 @@ public final class DatabaseHelper extends SQLiteOpenHelper {
 		executeCreate(db);
 		executeCreateIndex(db);
 		executeCreateVirtualTable(db);
-		//executeAlter(db);
+		executeAlter(db);
 	}
 
 	@Override
@@ -204,6 +205,7 @@ public final class DatabaseHelper extends SQLiteOpenHelper {
 					tableInfo.setSchema(schema);
 				}
 				if (android.text.TextUtils.isEmpty(tableInfo.getSchema())) continue;
+				if (!TextUtils.isEmpty(tableInfo.getModule())) continue; // not support virtual table
 				String sql = SQLiteUtils.createAlterDefinition(db, tableInfo);
 				if (android.text.TextUtils.isEmpty(sql)) continue;
 				Log.d("alterSql: " + sql);
