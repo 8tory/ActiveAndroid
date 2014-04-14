@@ -341,6 +341,8 @@ public abstract class Model implements com.novoda.notils.cursor.SimpleCursorList
 	}
 
 	public static <T extends Model> T load(Class<T> type, long id) {
+		Model entity = Cache.getEntity(type, id);
+		if (entity != null) return (T) entity;
 		if (ActiveAndroid.inContentProvider()) return loadByContentProvider(type, id);
 		else return loadByActiveAndroid(type, id);
 	}
@@ -410,12 +412,7 @@ public abstract class Model implements com.novoda.notils.cursor.SimpleCursorList
 					final long entityId = cursor.getLong(columnIndex);
 					final Class<? extends Model> entityType = (Class<? extends Model>) fieldType;
 
-					Model entity = Cache.getEntity(entityType, entityId);
-					if (entity == null) {
-						entity = new Select().from(entityType).where("Id=?", entityId).executeSingle();
-					}
-
-					value = entity;
+					value = Model.load(entityType, entityId);
 				}
 				else if (ReflectionUtils.isSubclassOf(fieldType, Enum.class)) {
 					@SuppressWarnings("rawtypes")
