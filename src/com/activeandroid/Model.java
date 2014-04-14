@@ -35,6 +35,7 @@ import android.net.Uri;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.util.concurrent.locks.ReentrantLock;
 
 @SuppressWarnings("unchecked")
 public abstract class Model implements com.novoda.notils.cursor.SimpleCursorList.MarshallerListener<Model> {
@@ -55,6 +56,10 @@ public abstract class Model implements com.novoda.notils.cursor.SimpleCursorList
 	private TableInfo mTableInfo;
 
 	private boolean enable = true;
+
+	private ReentrantLock mLock;
+
+	private boolean mDeleted = false;
 
 	//////////////////////////////////////////////////////////////////////////////////////
 	// CONSTRUCTORS
@@ -269,6 +274,10 @@ public abstract class Model implements com.novoda.notils.cursor.SimpleCursorList
 				}
 			}
 		} else { // update for mId
+			if (mDeleted) {
+				return new Long(-1);
+			}
+
 			if (mSpecificId != null && !mReplace) {
 				if (!ActiveAndroid.inContentProvider()) {
 					delete();
@@ -289,6 +298,10 @@ public abstract class Model implements com.novoda.notils.cursor.SimpleCursorList
 				Cache.getContext().getContentResolver().update(ContentProvider.createUri(mTableInfo.getType(), null), values, "Id=" + mId, null);
 			}
 			}
+		}
+
+		if ((mId != -1) && (Cache.getEntity(getClass(), mId) != null)) {
+			Cache.addEntity(this);
 		}
 
 		Cache.getContext().getContentResolver()
@@ -348,6 +361,50 @@ public abstract class Model implements com.novoda.notils.cursor.SimpleCursorList
 	}
 
 	// Model population
+
+	public final void lock() {
+		if (((mId == null) || (mId == -1)) && (mSpecificId != null)) {
+			return;
+		}
+
+		mLock = Cache.getModelLock(this);
+		mLock.lock();
+		load();
+	}
+
+	public final void unlock() {
+		if (mLock != null) {
+			mLock.unlock();
+			mLock = null;
+		}
+	}
+
+	public final void load() {
+		if ((mId == null) || (mId == -1)) {
+			return;
+		}
+
+		Model model = Model.load(getClass(), mId);
+		if (model == null) {
+			mDeleted = true;
+			return;
+		}
+
+		if (model == this) {
+			return;
+		}
+
+		for (Field field : mTableInfo.getFields()) {
+			try {
+				field.setAccessible(true);
+				field.set(this, field.get(model));
+			} catch (IllegalArgumentException e) {
+				e.printStackTrace();
+			} catch (IllegalAccessException e) {
+				e.printStackTrace();
+			}
+		}
+	}
 
 	public final int loadFromCursor(Cursor cursor) {
 		int sizeOfColumnNotFound = 0;

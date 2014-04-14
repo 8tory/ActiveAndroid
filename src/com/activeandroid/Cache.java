@@ -17,7 +17,11 @@ package com.activeandroid;
  */
 
 import java.io.File;
+import java.lang.ref.WeakReference;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.locks.ReentrantLock;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
@@ -50,6 +54,8 @@ public final class Cache {
 
 	private static Configuration sConfiguration;
 	private static String sDatabaseName;
+
+	private static Map<String, WeakReference<ReentrantLock>> sModelLocks = new HashMap<String, WeakReference<ReentrantLock>>();
 
 	//////////////////////////////////////////////////////////////////////////////////////
 	// CONSTRUCTORS
@@ -184,6 +190,16 @@ public final class Cache {
 		return getIdentifier(entity.getClass(), entity.getId());
 	}
 
+	public static String getIdentifier8(Model entity) {
+		String identifier;
+		if ((entity.getId() != null) && (entity.getId() != -1)) {
+			identifier = getIdentifier(entity);
+		} else {
+			identifier = getIdentifier(entity.getClass(), entity.getSpecificId());
+		}
+		return identifier;
+	}
+
 	public static synchronized void addEntity(Model entity) {
 		if (sEntities == null) return;
 		synchronized (sEntities) {
@@ -220,6 +236,15 @@ public final class Cache {
 
 	public static synchronized String getTableName(Class<? extends Model> type) {
 		return sModelInfo.getTableInfo(type).getTableName();
+	}
+
+	public static synchronized ReentrantLock getModelLock(Model model) {
+		WeakReference<ReentrantLock> modelRef = sModelLocks.get(getIdentifier8(model));
+		if ((modelRef == null) || (modelRef.get() == null)) {
+			modelRef = new WeakReference<ReentrantLock>(new ReentrantLock());
+			sModelLocks.put(getIdentifier8(model), modelRef);
+		}
+		return modelRef.get();
 	}
 
 	public static synchronized void beginTransaction() {
