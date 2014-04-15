@@ -240,11 +240,19 @@ public final class Cache {
 
 	public static synchronized ReentrantLock getModelLock(Model model) {
 		WeakReference<ReentrantLock> modelRef = sModelLocks.get(getIdentifier8(model));
-		if ((modelRef == null) || (modelRef.get() == null)) {
-			modelRef = new WeakReference<ReentrantLock>(new ReentrantLock());
+		ReentrantLock lock = null;
+
+		if (modelRef != null) {
+			lock = modelRef.get();
+		}
+
+		if (lock == null) {
+			lock = new ReentrantLock();
+			modelRef = new WeakReference<ReentrantLock>(lock);
 			sModelLocks.put(getIdentifier8(model), modelRef);
 		}
-		return modelRef.get();
+
+		return lock;
 	}
 
 	public static synchronized void beginTransaction() {
